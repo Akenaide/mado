@@ -1,0 +1,17 @@
+[project]
+name = ""
+version = ""
+description = ""
+authors = [
+    {name = "Akenaide", email = "kevinms1@gmail.com"},
+]
+dependencies = [
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.12.1",
+    "fastapi>=0.104.1",
+    "strawberry-graphql>=0.215.0",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
