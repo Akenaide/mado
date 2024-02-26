@@ -20,17 +20,3 @@ services:
         - action: rebuild
           path: pyproject.toml
 
-  db:
-    image: postgres:16.1-bullseye
-    user: postgres
-    restart: always
-    ports:
-      - 5432
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: mado
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5

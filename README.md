@@ -16,7 +16,6 @@ Card list for card game weiss schwarz
 - Docker compose v2.22 or later to use `watch`
 
 ### Env
-- POSTGRES_PASSWORD: Password for Postgres container.
 - WEB_PORT: Fastapi will serve to this port.
 
 ### Start
