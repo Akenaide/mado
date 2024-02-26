@@ -17,6 +17,9 @@ Card list for card game weiss schwarz
 
 ### Env
 - WEB_PORT: Fastapi will serve to this port.
+- KIBANA_PASSWORD: Used by Kibana, don't use it to log in Kibana
+- ELASTIC_PASSWORD: Use it to login in Kibana
+- KIBANA_ENCRYPTION_KEY: Set 32+ characters
 
 ### Start
 - Use `docker-compose watch` to start the project.
