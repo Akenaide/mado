@@ -23,3 +23,6 @@ Card list for card game weiss schwarz
 
 ### Start
 - Use `docker-compose watch` to start the project.
+- Kibana: http://localhost:5601.
+  - username: elastic
+  - password: {ELASTIC_PASSWORD}
