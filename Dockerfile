@@ -12,8 +12,6 @@ COPY pyproject.toml .
 RUN pdm install
 FROM python as package_installed
 
-COPY alembic.ini .
-COPY alembic/* alembic/
 # The chown is not recommended but I want to test `docker compose watch` and currently it's needed.
 COPY --chown=app:app src/* src/
 
