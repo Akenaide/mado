@@ -6,6 +6,7 @@ class Card:
     set_code: str
     name: str
     image64: str
+    image_url: str
     id_card: str
     ability: typing.List[str]
     rarity: str
@@ -16,3 +17,4 @@ class Card:
     color: str
     card_type: str
     special_attribute: typing.List[str]
+    language: str
