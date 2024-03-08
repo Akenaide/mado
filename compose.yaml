@@ -17,6 +17,8 @@ services:
       context: .
     ports:
       - ${WEB_PORT}:${WEB_PORT}
+    volumes:
+      - ${CARDS_FOLDERS}:/data/cards
     develop:
       watch:
         - action: sync
