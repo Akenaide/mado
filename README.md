@@ -21,6 +21,8 @@ Card list for card game weiss schwarz
 - ELASTIC_PASSWORD: Use it to login in Kibana
 - KIBANA_ENCRYPTION_KEY: Set 32+ characters
 - CARDS_FOLDERS: path to cards files, it is used when you import card data
+- ES_RAM: limit ram allocate to ElasticSearch (default: 1200m)
+- KIBANA_RAM: limit ram allocate to Kibana (default: 1200m)
 
 ### Start
 - Use `docker-compose watch` to start the project.
