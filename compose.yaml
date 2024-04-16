@@ -12,7 +12,6 @@ services:
   back:
     environment:
       - WEB_PORT=${WEB_PORT}
-    image: back
     build:
       context: .
     ports:
@@ -117,6 +116,11 @@ services:
       timeout: 10s
       retries: 120
 
+    deploy:
+      resources:
+        limits:
+          memory: ${ES_RAM:-1200m}
+
   kibana:
     depends_on:
       es01:
@@ -147,3 +151,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+
+    deploy:
+      resources:
+        limits:
+          memory: ${KIBANA_RAM:-1200m}

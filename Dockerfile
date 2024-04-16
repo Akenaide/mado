@@ -13,7 +13,7 @@ RUN pdm install
 FROM python as package_installed
 
 # The chown is not recommended but I want to test `docker compose watch` and currently it's needed.
-COPY --chown=app:app src/* src/
+COPY --chown=app:app ./src src
 
 WORKDIR /app/src
 
