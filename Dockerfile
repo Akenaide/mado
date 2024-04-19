@@ -4,7 +4,8 @@ USER root
 WORKDIR /app
 ENV WEB_PORT 8000
 EXPOSE ${WEB_PORT}
-RUN useradd  app
+# pdm needs the user to have a valid home directory (else PermissionError occurs)
+RUN useradd app --home /home/app --create-home
 
 RUN curl -sSL https://pdm-project.org/install-pdm.py | PDM_HOME=/usr/local python3 -
 COPY pdm.lock .
