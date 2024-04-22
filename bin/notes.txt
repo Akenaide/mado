@@ -1,0 +1,60 @@
+http://localhost:5601/app/dev_tools#/console
+
+To have a green status, since we won't have multiple shards:
+PUT _settings
+{
+  "index.number_of_replicas": 0
+}
+
+
+List all cards, match with _id
+GET cards/_search
+{
+    "_source": false,
+    "query": {
+        "match_all": {}
+    }
+}
+
+
+Search on keywords
+https://www.elastic.co/guide/en/elasticsearch/reference/current/search-your-data.html
+keyword = exact search
+text = full text search
+
+GET cards/_search // Exact search on keywords
+{
+  "query": {
+    "term": {
+      "id": "AYT/W110-001"
+    }
+  }
+}
+
+GET cards/_search // Keyword search for dual-index fields
+{
+  "query": {
+    "term": {
+      "name.keyword": "女子の一面 祭里"
+    }
+  }
+}
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/full-text-queries.html
+
+GET cards/_search // Full-text search
+{
+  "query": {
+    "match": {
+      "name": "女子"
+    }
+  }
+}
+GET cards/_search
+{
+  "query": {
+    "match": {
+      "abilities.ability": "【CXコンボ】"
+    }
+  }
+}
