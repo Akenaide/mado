@@ -9,23 +9,6 @@ volumes:
     driver: local
 
 services:
-  back:
-    environment:
-      - WEB_PORT=${WEB_PORT}
-    build:
-      context: .
-    ports:
-      - ${WEB_PORT}:${WEB_PORT}
-    volumes:
-      - ${CARDS_FOLDERS}:/data/cards
-    develop:
-      watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: rebuild
-          path: pyproject.toml
-
 
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
@@ -156,3 +139,24 @@ services:
       resources:
         limits:
           memory: ${KIBANA_RAM:-1200m}
+
+  back:
+    env_file: .env
+    build:
+      context: .
+    depends_on:
+      es01:
+        condition: service_healthy
+    ports:
+      - ${WEB_PORT}:${WEB_PORT}
+    volumes:
+      - ${CARDS_FOLDERS}:/data/cards
+      - certs:/certs
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: rebuild
+          path: pyproject.toml
+
