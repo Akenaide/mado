@@ -7,7 +7,7 @@ authors = [
 ]
 dependencies = [
     "fastapi>=0.104.1",
-    "strawberry-graphql>=0.215.0",
+    "strawberry-graphql[fastapi]>=0.227.2",
     "uvicorn[standard]>=0.24.0.post1",
     "pydantic-settings>=2.2.1",
     "elasticsearch>=8.13.0",
