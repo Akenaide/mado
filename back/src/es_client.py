@@ -9,7 +9,7 @@ settings = get_settings()
 API_KEY_PATH = os.path.join(settings.base_dir, "es_api_key")
 
 
-def get_es_client():
+def get_es_client() -> Elasticsearch:
     if not os.path.exists(API_KEY_PATH):
         create_es_api_key()
 
