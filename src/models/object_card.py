@@ -1,6 +1,7 @@
 import typing
 import strawberry
 
+
 @strawberry.type
 class Card:
     set_code: str

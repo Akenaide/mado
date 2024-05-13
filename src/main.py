@@ -1,8 +1,23 @@
+from contextlib import asynccontextmanager
+import os
 from typing import Union
 
 from fastapi import FastAPI
 
-app = FastAPI()
+from es_client import create_es_api_key
+from es_client import API_KEY_PATH
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # check if ES API key exists
+    if not os.path.exists(API_KEY_PATH):
+        create_es_api_key()
+
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
