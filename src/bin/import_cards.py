@@ -1,26 +1,42 @@
-import typing
+#!/usr/bin/env python3
+import json
 from pathlib import Path
+import typing
 
-from es_import import utilities
+import fixpath as _
+from config import get_settings
+from es_client import get_es_client
 
-def import_cards(cards_dir: str, client: utilities.ESClient) -> None:
-    """
-    Recursively import all .json files in the directory
-    """
-    for path in Path(cards_dir).rglob('*.json'):
-        _import_card(path, client)
+"""
+Recursively import all .json files from the cards directory
+"""
+
+settings = get_settings()
+stats = {
+    'created': 0,
+    'updated': 0,
+    'failed': 0
+}
 
 
-def _import_card(cards_dir: str, client: utilities.ESClient) -> None:
+def _import_card(card_path: str, client) -> None:
     """
     Import a single .json card
     """
-    card_json = utilities.get_json(cards_dir)
-    es_json = _transform_card_json(card_json)
-    resp = client.get_client.index(index="cards", body=es_json, id=es_json['id'])
-    # Print errors
-    if resp['result'] != 'created' and resp['result'] != 'updated':
-        print(resp)
+    with open(card_path, "r", encoding='utf-8') as json_file:
+        card_json = json.load(json_file)
+        es_json = _transform_card_json(card_json)
+        resp = client.index(index="cards", body=es_json, id=es_json['id'])
+
+        match resp['result']:
+            case 'created':
+                stats['created'] += 1
+            case 'updated':
+                stats['updated'] += 1
+            case _:
+                stats['failed'] += 1
+                # TODO Log errors?
+                print(card_path + " failed")
 
 
 def _transform_card_json(card_json: typing.Any) -> dict[str, typing.Any]:
@@ -54,3 +70,16 @@ def _transform_card_json(card_json: typing.Any) -> dict[str, typing.Any]:
         es_json["specialAttribs"].append({"specialAttrib": specialAttrib})
 
     return es_json
+
+
+def main():
+    es = get_es_client()
+
+    for path in Path(settings.cards_dir).rglob('*.json'):
+        _import_card(path, es)
+    
+    print(stats)
+
+
+if __name__ == "__main__":
+    main()
