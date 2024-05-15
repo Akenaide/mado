@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     es_cert_path: str = "/certs/ca/ca.crt"
     es_url: str = "https://es01:9200/"
     elastic_username: str = "elastic"
-    elastic_password: str = os.getenv("ELASTIC_PASSWORD")
+    elastic_password: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 @lru_cache
