@@ -1,6 +1,7 @@
 import typing
 import strawberry
 
+
 @strawberry.type
 class Card:
     set_code: str
@@ -25,71 +26,24 @@ Elasticsearch mappings for 'cards' documents
 """
 es_mappings = {
     "properties": {
-        "id": {
-            "type": "keyword"
-        },
-        "set": {
-            "type": "keyword"
-        },
-        "setName": {
-            "type": "keyword"
-        },
+        "id": {"type": "keyword"},
+        "set": {"type": "keyword"},
+        "setName": {"type": "keyword"},
         "name": {
             "type": "text",
-            "fields": {
-                "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                }
-            }
+            "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
         },
-        "imageURL": {
-            "type": "keyword"
-        },
-        "cardType": {
-            "type": "keyword"
-        },
-        "color": {
-            "type": "keyword"
-        },
-        "level": {
-            "type": "integer"
-        },
-        "cost": {
-            "type": "integer"
-        },
-        "power": {
-            "type": "integer"
-        },
-        "soul": {
-            "type": "integer"
-        },
-        "rarity": {
-            "type": "keyword"
-        },
-        "triggers": {
-            "properties": {
-                "trigger": {
-                    "type": "keyword"
-                }
-            }
-        },
-        "abilities": {
-            "properties": {
-                "ability": {
-                    "type": "text"
-                }
-            }
-        },
-        "specialAttribs": {
-            "properties": {
-                "specialAttrib": {
-                    "type": "keyword"
-                }
-            }
-        },
-        "language": {
-            "type": "keyword"
-        }
+        "imageURL": {"type": "keyword"},
+        "cardType": {"type": "keyword"},
+        "color": {"type": "keyword"},
+        "level": {"type": "integer"},
+        "cost": {"type": "integer"},
+        "power": {"type": "integer"},
+        "soul": {"type": "integer"},
+        "rarity": {"type": "keyword"},
+        "triggers": {"properties": {"trigger": {"type": "keyword"}}},
+        "abilities": {"properties": {"ability": {"type": "text"}}},
+        "specialAttribs": {"properties": {"specialAttrib": {"type": "keyword"}}},
+        "language": {"type": "keyword"},
     }
 }

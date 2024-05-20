@@ -12,11 +12,7 @@ Recursively import all .json files from the cards directory
 """
 
 settings = get_settings()
-stats = {
-    "created": 0,
-    "updated": 0,
-    "failed": 0
-}
+stats = {"created": 0, "updated": 0, "failed": 0}
 
 
 def _import_card(card_path: str, client) -> None:
@@ -57,7 +53,7 @@ def _transform_card_json(card_json) -> dict[str, typing.Any]:
         "triggers": [],
         "abilities": [],
         "specialAttribs": [],
-        "language": "JP"
+        "language": "JP",
     }
     for trigger in card_json["trigger"]:
         es_json["triggers"].append({"trigger": trigger})
@@ -74,7 +70,7 @@ def main():
 
     for path in Path(settings.cards_dir).rglob("*.json"):
         _import_card(path, es)
-    
+
     print(stats)
 
 
