@@ -19,9 +19,9 @@ jobs:
       with:
         filters: |
           backend:
-            - 'src/**'
+            - 'back/**'
           frontend:
             - 'front/**'
     - name: Build the Docker image
       if: steps.filter.output.backend == 'true'
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: cd back && docker build . --file Dockerfile --tag mado:$(date +%s)
