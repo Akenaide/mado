@@ -1,5 +1,6 @@
 import strawberry
 
+
 @strawberry.type
 class Set:
     release_date: str
