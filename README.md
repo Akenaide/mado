@@ -2,7 +2,7 @@
 Card list for card game weiss schwarz
 
 ## Front
-- https://flutter.dev 
+- https://flutter.dev
 
 ## Database
 - https://strawberry.rocks/docs GraphQl
@@ -14,6 +14,7 @@ Card list for card game weiss schwarz
 
 ## Local dev
 - Docker compose v2.22 or later to use `watch`
+- `pipx install pre-commit` (https://pre-commit.com/#intro)[https://pre-commit.com/#intro]
 
 ### Env
 - WEB_PORT: Fastapi will serve to this port.
