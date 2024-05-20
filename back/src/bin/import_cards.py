@@ -12,7 +12,11 @@ Recursively import all .json files from the cards directory
 """
 
 settings = get_settings()
-stats = {"created": 0, "updated": 0, "failed": 0}
+stats = {
+    "created": 0,
+    "updated": 0,
+    "failed": 0,
+}
 
 
 def _import_card(card_path: str, client) -> None:
