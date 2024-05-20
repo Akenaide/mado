@@ -13,6 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          backend:
+            - 'src/**'
+          frontend:
+            - 'front/**'
     - name: Build the Docker image
+      if: steps.filter.output.backend == 'true'
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
