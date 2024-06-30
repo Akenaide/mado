@@ -24,7 +24,7 @@ class Card:
 """
 Elasticsearch mappings for 'cards' documents
 """
-es_mappings = {
+card_es_mappings = {
     "properties": {
         "id": {
             "type": "keyword",

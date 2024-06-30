@@ -150,7 +150,7 @@ services:
     ports:
       - ${WEB_PORT}:${WEB_PORT}
     volumes:
-      - ${CARDS_FOLDERS}:/data/cards
+      - ${CARDS_FOLDERS}:/data/
       - certs:/certs
     develop:
       watch:
@@ -159,3 +159,5 @@ services:
           target: /app/src
         - action: rebuild
           path: pyproject.toml
+        - action: rebuild
+          path: .env
