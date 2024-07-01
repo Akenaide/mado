@@ -63,6 +63,7 @@ services:
       setup:
         condition: service_healthy
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    restart: on-failure
     labels:
       co.elastic.logs/module: elasticsearch
     volumes:

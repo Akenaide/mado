@@ -5,6 +5,7 @@ import typing
 
 import strawberry
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 
 from es_client import create_es_api_key
@@ -31,6 +32,13 @@ class Query:
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 schema = strawberry.Schema(Query)
 graphql_app = GraphQLRouter(schema)
