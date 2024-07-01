@@ -11,7 +11,7 @@ settings = get_settings()
 class Set:
     release_date: str
     title: str
-    image64: str
+    image64: typing.Optional[str] = None
     image_url: str
     set_code: str
 
