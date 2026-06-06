@@ -9,7 +9,8 @@ Card list for card game weiss schwarz
 
 ## Python
 - https://fastapi.tiangolo.com web framework
-- https://pdm-project.org/latest/ package manager
+- https://www.meilisearch.com search engine
+- https://github.com/astral-sh/uv package manager
 
 
 ## Local dev
@@ -17,20 +18,18 @@ Card list for card game weiss schwarz
 - `pipx install pre-commit` (https://pre-commit.com/#intro)[https://pre-commit.com/#intro]
 
 ### Env
-- WEB_PORT: Fastapi will serve to this port.
-- KIBANA_PASSWORD: Used by Kibana, don't use it to log in Kibana
-- ELASTIC_PASSWORD: Use it to login in Kibana
-- KIBANA_ENCRYPTION_KEY: Set 32+ characters
-- CARDS_FOLDERS: path to cards files, it is used when you import card data
-- ES_RAM: limit ram allocate to ElasticSearch (default: 1200m)
-- KIBANA_RAM: limit ram allocate to Kibana (default: 1200m)
-
-### ElasticSearch
-- You need the certificate created by the service `setup` in the `compose.yaml`. You can access it by using `docker copy` or using the docker volume `certs`
-- You also need an API key, it can be created on kibana (http://localhost:5601/app/management/security/api_keys)[http://localhost:5601/app/management/security/api_keys]
+- `CARDS_FOLDERS`: path to card files, used when importing card data
+- `MEILI_MASTER_KEY`: Meilisearch master key — any random string (min 16 chars). Generate one with `openssl rand -hex 32`
 
 ### Start
-- Use `docker-compose watch` to start the project.
-- Kibana: http://localhost:5601.
-  - username: elastic
-  - password: {ELASTIC_PASSWORD}
+- Use `docker compose watch` to start the project.
+- API: http://localhost/graphql
+- Meilisearch UI: http://meili.localhost
+  - Use your `MEILI_MASTER_KEY` as the API key to log in
+
+### Import data
+```bash
+uv run python src/bin/create_indexes.py
+uv run python src/bin/import_sets.py
+uv run python src/bin/import_cards.py
+```

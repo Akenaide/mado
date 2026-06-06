@@ -1,0 +1,7 @@
+meili.localhost:80 {
+    reverse_proxy meilisearch:7700
+}
+
+localhost:80 {
+    reverse_proxy back:8013
+}
