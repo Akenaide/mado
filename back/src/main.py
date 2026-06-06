@@ -1,3 +1,4 @@
+from config import get_settings
 from contextlib import asynccontextmanager
 from typing import Union
 import typing
@@ -6,8 +7,11 @@ import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
+from fastapi.staticfiles import StaticFiles
 
 from models import object_set
+
+settings = get_settings()
 
 
 @asynccontextmanager
@@ -22,9 +26,13 @@ class Query:
         return "Hello World"
 
     sets: typing.List[object_set.Set] = strawberry.field(resolver=object_set.get_sets)
+    search_sets: typing.List[object_set.Set] = strawberry.field(
+        resolver=object_set.search_sets
+    )
 
 
 app = FastAPI(lifespan=lifespan)
+app.mount("/medias", StaticFiles(directory=settings.medias_dir), name="medias")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
