@@ -2,13 +2,13 @@
 class WsSet {
   final String releaseDate;
   final String title;
-  final String imageUrl;
+  final String imagePath;
   final String setCode;
 
   WsSet({
     required this.releaseDate,
     required this.title,
-    required this.imageUrl,
+    required this.imagePath,
     required this.setCode,
   });
 }
@@ -19,7 +19,18 @@ query {
     releaseDate
     setCode
     title
-    imageUrl
+    imagePath
+  }
+}
+""";
+
+const searchWsSets = """
+query SearchSets(\$query: String!) {
+  searchSets(query: \$query) {
+    releaseDate
+    setCode
+    title
+    imagePath
   }
 }
 """;

@@ -9,8 +9,9 @@ void main() async {
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
+  const backendUrl = String.fromEnvironment('BACKEND_URL');
   final graphQlClient = GraphQLClient(
-    link: HttpLink('http://localhost:8013/graphql'),
+    link: HttpLink('$backendUrl/graphql'),
     cache: GraphQLCache(),
   );
   final valueNotifier = ValueNotifier<GraphQLClient>(graphQlClient);

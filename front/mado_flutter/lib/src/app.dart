@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mado_flutter/src/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_list_view.dart';
@@ -79,7 +79,10 @@ class MyApp extends StatelessWidget {
                         return const SampleItemDetailsView();
                       case SampleItemListView.routeName:
                       default:
-                        return const WsSetListView();
+                        return Scaffold(
+                          appBar: AppBar(title: const Text('Sets')),
+                          body: const WsSetListView(),
+                        );
                     }
                   },
                 );
