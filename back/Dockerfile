@@ -4,8 +4,7 @@ FROM python:3.11 as python
 
 USER root
 WORKDIR /app
-ENV WEB_PORT 8000
-EXPOSE ${WEB_PORT}
+EXPOSE 8013
 
 COPY --from=uv /uv /uvx /usr/local/bin/
 
@@ -18,4 +17,4 @@ FROM python as package_installed
 COPY ./src src
 WORKDIR /app/src
 
-CMD ["uv", "run", "uvicorn", "main:app", "--reload", "--port", "${WEB_PORT}", "--host", "0.0.0.0"]
+CMD ["uv", "run", "uvicorn", "main:app", "--reload", "--port", "8013", "--host", "0.0.0.0"]

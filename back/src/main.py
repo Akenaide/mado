@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-import os
 from typing import Union
 import typing
 
@@ -8,17 +7,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 
-from es_client import create_es_api_key
-from es_client import API_KEY_PATH
 from models import object_set
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # check if ES API key exists
-    if not os.path.exists(API_KEY_PATH):
-        create_es_api_key()
-
     yield
 
 
