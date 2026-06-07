@@ -1,6 +1,8 @@
 volumes:
   meilidata:
     driver: local
+  medias:
+    driver: local
 
 services:
 
@@ -27,6 +29,7 @@ services:
       context: .
     volumes:
       - ${CARDS_FOLDERS}:/data/
+      - ${MEDIAS_DIR:-medias}:/medias/
     depends_on:
       - meilisearch
     develop:

@@ -28,7 +28,9 @@ def main():
     )
 
     cards = client.index("cards")
-    cards.update_searchable_attributes(["name", "abilities"])
+    cards.update_searchable_attributes(
+        ["name", "cardcode", "rarity", "level", "color", "abilities"]
+    )
     cards.update_filterable_attributes(
         ["set", "color", "level", "cost", "rarity", "cardType", "language"]
     )
