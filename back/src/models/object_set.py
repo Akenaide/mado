@@ -6,13 +6,14 @@ from meili_client import get_meili_client
 
 @strawberry.type
 class Set:
+    id: str
     release_date: str
     release_year: int
     title: str
-    image64: typing.Optional[str] = None
     image_path: typing.Optional[str] = None
     image_url: typing.Optional[str] = None
     set_code: str
+    product_type: str
 
 
 def get_sets() -> typing.List[Set]:
