@@ -2,20 +2,27 @@
 class WsSet {
   final String releaseDate;
   final String title;
-  final String imagePath;
+  final String? imagePath;
   final String setCode;
 
-  WsSet({
+  const WsSet({
     required this.releaseDate,
     required this.title,
-    required this.imagePath,
+    this.imagePath,
     required this.setCode,
   });
+
+  factory WsSet.fromMap(Map<String, dynamic> m) => WsSet(
+        releaseDate: m['releaseDate'] as String? ?? '',
+        title: m['title'] as String? ?? '',
+        imagePath: m['imagePath'] as String?,
+        setCode: m['setCode'] as String? ?? '',
+      );
 }
 
 const readWsSet = """
-query {
-  sets {
+query GetSets(\$pageNum: Int, \$pageSize: Int) {
+  sets(pageNum: \$pageNum, pageSize: \$pageSize) {
     releaseDate
     setCode
     title
@@ -25,8 +32,8 @@ query {
 """;
 
 const searchWsSets = """
-query SearchSets(\$query: String!) {
-  searchSets(query: \$query) {
+query SearchSets(\$query: String!, \$pageNum: Int, \$pageSize: Int) {
+  searchSets(query: \$query, pageNum: \$pageNum, pageSize: \$pageSize) {
     releaseDate
     setCode
     title
