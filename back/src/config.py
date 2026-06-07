@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     set_file: str = "/data/products.json"
     meili_url: str = "http://meilisearch:7700"
     meili_master_key: str
+    page_size: int = 20
 
 
 @lru_cache
