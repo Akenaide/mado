@@ -6,6 +6,7 @@ import typing
 import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from strawberry.fastapi import GraphQLRouter
 from fastapi.staticfiles import StaticFiles
 
@@ -40,6 +41,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# ⚡ Bolt: Added GZip middleware to compress large GraphQL responses (e.g. lists of cards/sets)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 schema = strawberry.Schema(Query)
 graphql_app = GraphQLRouter(schema)
