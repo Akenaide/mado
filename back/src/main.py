@@ -6,6 +6,7 @@ import typing
 import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from strawberry.fastapi import GraphQLRouter
 from fastapi.staticfiles import StaticFiles
 
@@ -33,6 +34,7 @@ class Query:
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/medias", StaticFiles(directory=settings.medias_dir), name="medias")
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
