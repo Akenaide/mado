@@ -17,4 +17,4 @@ FROM python as package_installed
 COPY ./src src
 WORKDIR /app/src
 
-CMD ["uv", "run", "uvicorn", "main:app", "--reload", "--port", "8013", "--host", "0.0.0.0"]
+CMD ["uv", "run", "uvicorn", "main:app", "--port", "8013", "--host", "0.0.0.0"]

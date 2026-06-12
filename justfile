@@ -14,6 +14,17 @@ dev:
 build:
     cd back && podman compose build
 
+# Build and push multi-arch backend image to Docker Hub (amd64 + arm64)
+publish tag="latest":
+    podman build --platform linux/amd64 -t docker.io/akenaide/mado:{{tag}}-amd64 back
+    podman build --platform linux/arm64 -t docker.io/akenaide/mado:{{tag}}-arm64 back
+    podman rmi docker.io/akenaide/mado:{{tag}} || true
+    podman manifest rm docker.io/akenaide/mado:{{tag}} || true
+    podman manifest create docker.io/akenaide/mado:{{tag}}
+    podman manifest add docker.io/akenaide/mado:{{tag}} docker.io/akenaide/mado:{{tag}}-amd64
+    podman manifest add docker.io/akenaide/mado:{{tag}} docker.io/akenaide/mado:{{tag}}-arm64
+    podman manifest push --all docker.io/akenaide/mado:{{tag}}
+
 # Start all services (no watch)
 up:
     cd back && podman compose up
@@ -62,6 +73,11 @@ flutter-test:
 # Analyze Flutter code
 flutter-analyze:
     cd front/mado_flutter && flutter analyze
+
+# Build Flutter web and deploy to server (requires DEPLOY_HOST=user@host in .env)
+deploy-front:
+    cd front/mado_flutter && flutter build web --dart-define-from-file=.env.json
+    rsync -az --delete front/mado_flutter/build/web/ $DEPLOY_HOST:/home/web/apps/mado_front_artifacts/
 
 # --- Quality ---
 
