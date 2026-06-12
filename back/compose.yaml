@@ -27,6 +27,7 @@ services:
     env_file: .env
     build:
       context: .
+    command: ["uv", "run", "uvicorn", "main:app", "--reload", "--port", "8013", "--host", "0.0.0.0"]
     volumes:
       - ${CARDS_FOLDERS}:/data/
       - ${MEDIAS_DIR:-medias}:/medias/

@@ -1,0 +1,15 @@
+[Unit]
+Description=Mado Meilisearch
+After=network-online.target
+
+[Container]
+Image=getmeili/meilisearch:v1.8
+EnvironmentFile=%h/.config/mado/meilisearch.env
+Volume=%h/data/mado/meilidata:/meili_data
+Network=mado.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

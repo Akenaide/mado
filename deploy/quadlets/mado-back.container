@@ -1,0 +1,17 @@
+[Unit]
+Description=Mado Backend
+After=network-online.target mado-meilisearch.service
+
+[Container]
+Image=docker.io/akenaide/mado:latest
+EnvironmentFile=%h/.config/mado/back.env
+Volume=%h/data/mado/data:/data:ro
+Volume=%h/data/mado/medias:/medias
+PublishPort=127.0.0.1:8013:8013
+Network=mado.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
