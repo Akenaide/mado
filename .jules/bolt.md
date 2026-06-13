@@ -1,0 +1,3 @@
+## 2024-05-24 - Async Strawberry GraphQL Resolvers
+**Learning:** In Strawberry GraphQL (version `0.316.0`), if a resolver function is `async def`, Strawberry automatically handles it internally and correctly `await`s it during query execution. No changes are required in the `strawberry.field(resolver=...)` definition or type hints, they seamlessly accept both sync and async functions without the rest of the application or the type annotations breaking.
+**Action:** When migrating synchronous resolvers to asynchronous ones to prevent event loop blocking, only the resolver function signature (`async def`) and its internal logic (like `asyncio.to_thread`) need to be updated. Type definitions on the Strawberry schema will continue working correctly without modification.
