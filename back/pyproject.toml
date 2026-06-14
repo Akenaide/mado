@@ -19,5 +19,11 @@ license = {text = "MIT"}
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.4.0",
     "ptpython>=3.0.32",
+    "pytest>=8",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
