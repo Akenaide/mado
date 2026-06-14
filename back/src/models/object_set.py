@@ -10,6 +10,18 @@ settings = get_settings()
 
 
 @strawberry.type
+class CategoryStat:
+    name: str
+    count: int
+
+
+@strawberry.type
+class SetStats:
+    total: int
+    by_product_type: list[CategoryStat]
+
+
+@strawberry.type
 class Set:
     id: str
     release_date: str
@@ -50,3 +62,14 @@ async def search_sets(
 
     result = await asyncio.to_thread(_search)
     return [Set(**hit) for hit in result["hits"]]
+
+
+def get_set_stats(query: str = ""):
+    client = get_meili_client()
+    result = client.index("sets").search(
+        query, {"limit": 0, "facets": ["product_type"]}
+    )
+    dist = result.get("facetDistribution", {}).get("product_type", {})
+    # product_type is always set by the importer but may be "" for legacy docs — skip those
+    categories = [CategoryStat(name=k, count=v) for k, v in dist.items() if k]
+    return SetStats(total=sum(c.count for c in categories), by_product_type=categories)
