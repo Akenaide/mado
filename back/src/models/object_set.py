@@ -28,7 +28,7 @@ def get_sets(
     result = client.index("sets").search(
         "", pagination(page_size=page_size, page_num=page_num)
     )
-    return [Set(**dict(hit)) for hit in result["hits"]]
+    return [Set(**hit) for hit in result["hits"]]
 
 
 def search_sets(
@@ -40,4 +40,4 @@ def search_sets(
     result = client.index("sets").search(
         query, pagination(page_size=page_size, page_num=page_num)
     )
-    return [Set(**dict(hit)) for hit in result["hits"]]
+    return [Set(**hit) for hit in result["hits"]]
