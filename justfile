@@ -76,7 +76,7 @@ flutter-analyze:
 
 # Build Flutter web and deploy to server (requires DEPLOY_HOST=user@host in .env)
 deploy-front:
-    cd front/mado_flutter && flutter build web --dart-define-from-file=.env.json
+    cd front/mado_flutter && flutter build web --dart-define-from-file=.env.prod.json
     rsync -az --delete front/mado_flutter/build/web/ $DEPLOY_HOST:/home/web/apps/mado_front_artifacts/
 
 # --- Quality ---
