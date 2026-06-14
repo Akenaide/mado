@@ -13,7 +13,9 @@ def main():
 
     sets = client.index("sets")
     sets.update_searchable_attributes(["title", "release_date"])
-    sets.update_filterable_attributes(["set_code", "release_date", "release_year"])
+    sets.update_filterable_attributes(
+        ["set_code", "release_date", "release_year", "product_type"]
+    )
     sets.update_sortable_attributes(["release_date"])
     sets.update_ranking_rules(
         [

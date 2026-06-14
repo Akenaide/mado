@@ -30,6 +30,7 @@ class Query:
     search_sets: typing.List[object_set.Set] = strawberry.field(
         resolver=object_set.search_sets
     )
+    set_stats: object_set.SetStats = strawberry.field(resolver=object_set.get_set_stats)
 
 
 app = FastAPI(lifespan=lifespan)

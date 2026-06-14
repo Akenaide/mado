@@ -18,11 +18,19 @@ class _WsSetListViewState extends State<WsSetListView> {
   final _pagingController = PagingController<int, WsSet>(firstPageKey: 1);
   String _searchQuery = '';
   Timer? _debounce;
+  List<CategoryStat>? _allCategories;
+  WsSetStats? _filteredStats;
 
   @override
   void initState() {
     super.initState();
     _pagingController.addPageRequestListener(_fetchPage);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_allCategories == null) _fetchStats('');
   }
 
   @override
@@ -33,6 +41,25 @@ class _WsSetListViewState extends State<WsSetListView> {
     super.dispose();
   }
 
+  Future<void> _fetchStats(String query) async {
+    final client = GraphQLProvider.of(context).value;
+    final result = await client.query(QueryOptions(
+      document: gql(getSetStats),
+      variables: {'query': query},
+      fetchPolicy: FetchPolicy.networkOnly,
+    ));
+    if (!mounted) return;
+    final data = result.data?['setStats'];
+    if (data == null) return;
+    final stats = WsSetStats.fromMap(data as Map<String, dynamic>);
+    setState(() {
+      // Categories are product types defined by the game — fixed regardless of search.
+      // Fetched once on init so all chips are always visible, even when a search yields 0 for some.
+      if (query.isEmpty) _allCategories = stats.byProductType;
+      _filteredStats = stats;
+    });
+  }
+
   void _onSearchChanged(String value) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
@@ -40,6 +67,7 @@ class _WsSetListViewState extends State<WsSetListView> {
       if (trimmed == _searchQuery) return;
       setState(() => _searchQuery = trimmed);
       _pagingController.refresh();
+      _fetchStats(trimmed);
     });
   }
 
@@ -107,6 +135,7 @@ class _WsSetListViewState extends State<WsSetListView> {
             ),
           ),
         ),
+        SetStatsBar(allCategories: _allCategories, filtered: _filteredStats),
         Expanded(
           child: PagedGridView<int, WsSet>(
             pagingController: _pagingController,
@@ -129,6 +158,74 @@ class _WsSetListViewState extends State<WsSetListView> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class SetStatsBar extends StatelessWidget {
+  final List<CategoryStat>? allCategories;
+  final WsSetStats? filtered;
+
+  const SetStatsBar(
+      {super.key, required this.allCategories, required this.filtered});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (allCategories == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 8),
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final filteredMap = {
+      for (final c in filtered?.byProductType ?? []) c.name: c.count
+    };
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            '${filtered?.total ?? 0} products',
+            style: theme.textTheme.bodySmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          ...allCategories!.map((cat) {
+            final count = filteredMap[cat.name] ?? 0;
+            final isZero = count == 0;
+            return Chip(
+              label: Text('${cat.name} $count'),
+              labelStyle: theme.textTheme.bodySmall?.copyWith(
+                color: isZero ? theme.disabledColor : null,
+              ),
+              backgroundColor:
+                  isZero ? theme.disabledColor.withValues(alpha: 0.1) : null,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+            );
+          }),
+        ],
+      ),
     );
   }
 }

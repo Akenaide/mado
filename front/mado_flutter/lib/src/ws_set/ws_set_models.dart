@@ -1,4 +1,39 @@
-// Define the Set type based on your GraphQL schema
+class CategoryStat {
+  final String name;
+  final int count;
+
+  const CategoryStat({required this.name, required this.count});
+
+  factory CategoryStat.fromMap(Map<String, dynamic> m) => CategoryStat(
+        name: m['name'] as String? ?? '',
+        count: m['count'] as int? ?? 0,
+      );
+}
+
+class WsSetStats {
+  final int total;
+  final List<CategoryStat> byProductType;
+
+  const WsSetStats({required this.total, required this.byProductType});
+
+  factory WsSetStats.fromMap(Map<String, dynamic> m) => WsSetStats(
+        total: m['total'] as int? ?? 0,
+        byProductType: (m['byProductType'] as List<dynamic>? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .map(CategoryStat.fromMap)
+            .toList(),
+      );
+}
+
+const getSetStats = """
+query GetSetStats(\$query: String) {
+  setStats(query: \$query) {
+    total
+    byProductType { name count }
+  }
+}
+""";
+
 class WsSet {
   final String releaseDate;
   final String title;
