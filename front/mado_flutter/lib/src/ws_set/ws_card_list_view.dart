@@ -20,6 +20,7 @@ class WsCardListView extends StatefulWidget {
 class _WsCardListViewState extends State<WsCardListView> {
   final _pagingController = PagingController<int, WsCard>(firstPageKey: 1);
   bool _baseOnly = true;
+  bool _readMode = false;
 
   @override
   void initState() {
@@ -107,38 +108,58 @@ class _WsCardListViewState extends State<WsCardListView> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FilterChip(
-              label: const Text('Base'),
-              selected: _baseOnly,
-              onSelected: (_) => _toggleBaseOnly(),
-            ),
+          child: Row(
+            children: [
+              FilterChip(
+                label: const Text('Base'),
+                selected: _baseOnly,
+                onSelected: (_) => _toggleBaseOnly(),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: Icon(_readMode ? Icons.grid_on : Icons.view_agenda),
+                tooltip: _readMode ? 'Explore' : 'Read',
+                onPressed: () => setState(() => _readMode = !_readMode),
+              ),
+            ],
           ),
         ),
         Expanded(
-          child: PagedGridView<int, WsCard>(
-            pagingController: _pagingController,
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 150,
-              crossAxisSpacing: 6,
-              mainAxisSpacing: 6,
-              childAspectRatio: 0.7,
-            ),
-            builderDelegate: PagedChildBuilderDelegate(
-              itemBuilder: (context, card, index) => RepaintBoundary(
-                child: GestureDetector(
-                  onTap: () => _showCardZoom(context, card),
-                  child: _CardTile(card: card),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final readColumns = constraints.maxWidth < 600 ? 2 : 3;
+              return PagedGridView<int, WsCard>(
+                pagingController: _pagingController,
+                padding: const EdgeInsets.all(8),
+                gridDelegate: _readMode
+                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: readColumns,
+                        crossAxisSpacing: 6,
+                        mainAxisSpacing: 6,
+                        childAspectRatio: 0.7,
+                      )
+                    : const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 150,
+                        crossAxisSpacing: 6,
+                        mainAxisSpacing: 6,
+                        childAspectRatio: 0.7,
+                      ),
+                builderDelegate: PagedChildBuilderDelegate(
+                  itemBuilder: (context, card, index) => RepaintBoundary(
+                    child: GestureDetector(
+                      onTap:
+                          _readMode ? null : () => _showCardZoom(context, card),
+                      child: _CardTile(card: card),
+                    ),
+                  ),
+                  firstPageErrorIndicatorBuilder: (context) => Center(
+                    child: Text(_pagingController.error.toString()),
+                  ),
+                  noItemsFoundIndicatorBuilder: (context) =>
+                      const Center(child: Text('No cards found')),
                 ),
-              ),
-              firstPageErrorIndicatorBuilder: (context) => Center(
-                child: Text(_pagingController.error.toString()),
-              ),
-              noItemsFoundIndicatorBuilder: (context) =>
-                  const Center(child: Text('No cards found')),
-            ),
+              );
+            },
           ),
         ),
       ],

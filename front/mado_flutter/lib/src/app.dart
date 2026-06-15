@@ -82,7 +82,8 @@ class MyApp extends StatelessWidget {
                     }
                     if (name?.startsWith('/set/') ?? false) {
                       final setCode = name!.substring('/set/'.length);
-                      final args = routeSettings.arguments as Map<String, String>?;
+                      final args =
+                          routeSettings.arguments as Map<String, String>?;
                       final title = args?['title'] ?? setCode;
                       return Scaffold(
                         appBar: AppBar(title: Text(title)),

@@ -15,7 +15,11 @@ class _StubLink extends Link {
 
   @override
   Stream<Response> request(Request request, [NextLink? forward]) async* {
-    yield Response(data: data, errors: null, context: const Context(), response: {'data': data});
+    yield Response(
+        data: data,
+        errors: null,
+        context: const Context(),
+        response: {'data': data});
   }
 }
 
