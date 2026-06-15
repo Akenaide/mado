@@ -147,8 +147,16 @@ class _WsSetListViewState extends State<WsSetListView> {
               mainAxisExtent: 280,
             ),
             builderDelegate: PagedChildBuilderDelegate(
-              itemBuilder: (context, set, index) =>
-                  RepaintBoundary(child: _SetCard(set: set)),
+              itemBuilder: (context, set, index) => RepaintBoundary(
+                child: GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/set/${set.setCode}',
+                    arguments: {'title': set.title},
+                  ),
+                  child: _SetCard(set: set),
+                ),
+              ),
               firstPageErrorIndicatorBuilder: (context) => Center(
                 child: Text(_pagingController.error.toString()),
               ),

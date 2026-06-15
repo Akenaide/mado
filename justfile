@@ -76,7 +76,15 @@ flutter-analyze:
 
 # Build Flutter web and deploy to server (requires DEPLOY_HOST=user@host in .env)
 deploy-front:
-    cd front/mado_flutter && flutter build web --dart-define-from-file=.env.prod.json
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd front/mado_flutter
+    flutter build web --dart-define-from-file=.env.prod.json
+    HASH=$(md5 -q build/web/main.dart.js)
+    HASHED="main.dart.${HASH}.js"
+    mv build/web/main.dart.js "build/web/${HASHED}"
+    sed -i '' "s/main\.dart\.js/${HASHED}/g" build/web/flutter_bootstrap.js
+    cd ../..
     rsync -az --delete front/mado_flutter/build/web/ $DEPLOY_HOST:/home/web/apps/mado_front_artifacts/
 
 # --- Quality ---

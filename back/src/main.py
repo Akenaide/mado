@@ -11,6 +11,7 @@ from strawberry.fastapi import GraphQLRouter
 from fastapi.staticfiles import StaticFiles
 
 from models import object_set
+from models import object_card
 
 settings = get_settings()
 
@@ -31,6 +32,9 @@ class Query:
         resolver=object_set.search_sets
     )
     set_stats: object_set.SetStats = strawberry.field(resolver=object_set.get_set_stats)
+    cards: typing.List[object_card.Card] = strawberry.field(
+        resolver=object_card.get_cards
+    )
 
 
 app = FastAPI(lifespan=lifespan)

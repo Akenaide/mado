@@ -33,8 +33,22 @@ def main():
     cards.update_searchable_attributes(
         ["name", "cardcode", "rarity", "level", "color", "abilities"]
     )
+    cards.update_sortable_attributes(
+        [
+            "id_card",
+        ]
+    )
     cards.update_filterable_attributes(
-        ["set", "color", "level", "cost", "rarity", "cardType", "language"]
+        [
+            "set",
+            "color",
+            "level",
+            "cost",
+            "rarity",
+            "cardType",
+            "language",
+            "set_code",
+        ]
     )
 
     print("Indexes configured.")
