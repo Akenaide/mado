@@ -19,6 +19,7 @@ class WsCardListView extends StatefulWidget {
 
 class _WsCardListViewState extends State<WsCardListView> {
   final _pagingController = PagingController<int, WsCard>(firstPageKey: 1);
+  bool _baseOnly = true;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _WsCardListViewState extends State<WsCardListView> {
         'setCode': widget.setCode,
         'pageNum': pageKey,
         'pageSize': _pageSize,
+        'baseOnly': _baseOnly,
       },
       fetchPolicy: FetchPolicy.networkOnly,
     ));
@@ -64,26 +66,82 @@ class _WsCardListViewState extends State<WsCardListView> {
     }
   }
 
+  void _showCardZoom(BuildContext context, WsCard card) {
+    final backendUrl = const String.fromEnvironment('BACKEND_URL');
+    showDialog<void>(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: InteractiveViewer(
+            child: card.imagePath != null
+                ? card.isCx
+                    ? RotatedBox(
+                        quarterTurns: 1,
+                        child: Image.network(
+                          '$backendUrl${card.imagePath}',
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                    : Image.network(
+                        '$backendUrl${card.imagePath}',
+                        fit: BoxFit.contain,
+                      )
+                : const _FallbackImage(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _toggleBaseOnly() {
+    setState(() => _baseOnly = !_baseOnly);
+    _pagingController.refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PagedGridView<int, WsCard>(
-      pagingController: _pagingController,
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 150,
-        crossAxisSpacing: 6,
-        mainAxisSpacing: 6,
-        childAspectRatio: 0.7,
-      ),
-      builderDelegate: PagedChildBuilderDelegate(
-        itemBuilder: (context, card, index) =>
-            RepaintBoundary(child: _CardTile(card: card)),
-        firstPageErrorIndicatorBuilder: (context) => Center(
-          child: Text(_pagingController.error.toString()),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FilterChip(
+              label: const Text('Base'),
+              selected: _baseOnly,
+              onSelected: (_) => _toggleBaseOnly(),
+            ),
+          ),
         ),
-        noItemsFoundIndicatorBuilder: (context) =>
-            const Center(child: Text('No cards found')),
-      ),
+        Expanded(
+          child: PagedGridView<int, WsCard>(
+            pagingController: _pagingController,
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 150,
+              crossAxisSpacing: 6,
+              mainAxisSpacing: 6,
+              childAspectRatio: 0.7,
+            ),
+            builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (context, card, index) => RepaintBoundary(
+                child: GestureDetector(
+                  onTap: () => _showCardZoom(context, card),
+                  child: _CardTile(card: card),
+                ),
+              ),
+              firstPageErrorIndicatorBuilder: (context) => Center(
+                child: Text(_pagingController.error.toString()),
+              ),
+              noItemsFoundIndicatorBuilder: (context) =>
+                  const Center(child: Text('No cards found')),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

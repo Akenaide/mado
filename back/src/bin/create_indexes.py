@@ -45,7 +45,7 @@ def main():
             "level",
             "cost",
             "rarity",
-            "cardType",
+            "card_type",
             "language",
             "set_code",
         ]

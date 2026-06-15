@@ -22,8 +22,8 @@ class WsCard {
 }
 
 const readWsCards = """
-query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int) {
-  cards(setCode: \$setCode, pageNum: \$pageNum, pageSize: \$pageSize) {
+query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean) {
+  cards(setCode: \$setCode, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly) {
     idCard
     setCode
     imagePath
