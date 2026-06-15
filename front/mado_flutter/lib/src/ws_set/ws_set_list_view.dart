@@ -137,32 +137,38 @@ class _WsSetListViewState extends State<WsSetListView> {
         ),
         SetStatsBar(allCategories: _allCategories, filtered: _filteredStats),
         Expanded(
-          child: PagedGridView<int, WsSet>(
-            pagingController: _pagingController,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              mainAxisExtent: 280,
-            ),
-            builderDelegate: PagedChildBuilderDelegate(
-              itemBuilder: (context, set, index) => RepaintBoundary(
-                child: GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/set/${set.setCode}',
-                    arguments: {'title': set.title},
-                  ),
-                  child: _SetCard(set: set),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = (constraints.maxWidth / 300).floor().clamp(2, 5);
+              return PagedGridView<int, WsSet>(
+                pagingController: _pagingController,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  mainAxisExtent: 280,
                 ),
-              ),
-              firstPageErrorIndicatorBuilder: (context) => Center(
-                child: Text(_pagingController.error.toString()),
-              ),
-              noItemsFoundIndicatorBuilder: (context) =>
-                  const Center(child: Text('No sets found')),
-            ),
+                builderDelegate: PagedChildBuilderDelegate(
+                  itemBuilder: (context, set, index) => RepaintBoundary(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/set/${set.setCode}',
+                        arguments: {'title': set.title},
+                      ),
+                      child: _SetCard(set: set),
+                    ),
+                  ),
+                  firstPageErrorIndicatorBuilder: (context) => Center(
+                    child: Text(_pagingController.error.toString()),
+                  ),
+                  noItemsFoundIndicatorBuilder: (context) =>
+                      const Center(child: Text('No sets found')),
+                ),
+              );
+            },
           ),
         ),
       ],
