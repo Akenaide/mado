@@ -3,6 +3,7 @@ import 'package:mado_flutter/src/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_list_view.dart';
+import 'package:mado_flutter/src/ws_set/ws_card_list_view.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
 import 'sample_feature/sample_item_list_view.dart';
@@ -72,18 +73,26 @@ class MyApp extends StatelessWidget {
                 return MaterialPageRoute<void>(
                   settings: routeSettings,
                   builder: (BuildContext context) {
-                    switch (routeSettings.name) {
-                      case SettingsView.routeName:
-                        return SettingsView(controller: settingsController);
-                      case SampleItemDetailsView.routeName:
-                        return const SampleItemDetailsView();
-                      case SampleItemListView.routeName:
-                      default:
-                        return Scaffold(
-                          appBar: AppBar(title: const Text('Sets')),
-                          body: const WsSetListView(),
-                        );
+                    final name = routeSettings.name;
+                    if (name == SettingsView.routeName) {
+                      return SettingsView(controller: settingsController);
                     }
+                    if (name == SampleItemDetailsView.routeName) {
+                      return const SampleItemDetailsView();
+                    }
+                    if (name?.startsWith('/set/') ?? false) {
+                      final setCode = name!.substring('/set/'.length);
+                      final args = routeSettings.arguments as Map<String, String>?;
+                      final title = args?['title'] ?? setCode;
+                      return Scaffold(
+                        appBar: AppBar(title: Text(title)),
+                        body: WsCardListView(setCode: setCode),
+                      );
+                    }
+                    return Scaffold(
+                      appBar: AppBar(title: const Text('Sets')),
+                      body: const WsSetListView(),
+                    );
                   },
                 );
               },

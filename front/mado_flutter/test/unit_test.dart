@@ -1,10 +1,35 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_models.dart';
+import 'package:mado_flutter/src/ws_set/ws_card_models.dart';
 
 void main() {
   group('Plus Operator', () {
     test('should add two numbers together', () {
       expect(1 + 1, 2);
+    });
+  });
+
+  group('WsCard', () {
+    test('fromMap parses all fields', () {
+      /// Parsing a valid cards GraphQL payload produces correct WsCard.
+      ///
+      /// Given:
+      /// - A Map with idCard, setCode, and imagePath fields
+      ///
+      /// When:
+      /// - WsCard.fromMap is called
+      ///
+      /// Then:
+      /// - All fields are populated correctly
+      final card = WsCard.fromMap({
+        'idCard': 'BCS/W52-001',
+        'setCode': 'BCS/W52',
+        'imagePath': '/medias/BCS_W52/BCS_W52-001.png',
+      });
+
+      expect(card.idCard, 'BCS/W52-001');
+      expect(card.setCode, 'BCS/W52');
+      expect(card.imagePath, '/medias/BCS_W52/BCS_W52-001.png');
     });
   });
 
