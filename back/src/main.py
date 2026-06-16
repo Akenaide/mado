@@ -6,6 +6,7 @@ import typing
 import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from strawberry.fastapi import GraphQLRouter
 from fastapi.staticfiles import StaticFiles
 
@@ -33,6 +34,10 @@ class Query:
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/medias", StaticFiles(directory=settings.medias_dir), name="medias")
+# ⚡ Bolt Optimization: Added GZipMiddleware to compress HTTP responses larger than 1000 bytes.
+# 🎯 Why: GraphQL responses (JSON) can get quite large. Compressing payloads significantly reduces network transfer times.
+# 📊 Impact: Expected to reduce payload sizes for list and search queries by ~70-80%, leading to faster client load times.
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
