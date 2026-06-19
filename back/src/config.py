@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     meili_url: str = "http://meilisearch:7700"
     meili_master_key: str
     page_size: int = 20
+    allowed_origins: list[str] = ["http://localhost"]
 
 
 @lru_cache
