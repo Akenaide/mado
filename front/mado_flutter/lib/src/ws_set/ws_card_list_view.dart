@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -19,8 +20,11 @@ class WsCardListView extends StatefulWidget {
 
 class _WsCardListViewState extends State<WsCardListView> {
   final _pagingController = PagingController<int, WsCard>(firstPageKey: 1);
+  final _searchController = TextEditingController();
   bool _baseOnly = true;
   bool _readMode = false;
+  String _searchQuery = '';
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -30,19 +34,33 @@ class _WsCardListViewState extends State<WsCardListView> {
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
     _pagingController.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final trimmed = value.trim();
+      if (trimmed == _searchQuery) return;
+      setState(() => _searchQuery = trimmed);
+      _pagingController.refresh();
+    });
+  }
+
   Future<void> _fetchPage(int pageKey) async {
+    final isSearching = _searchQuery.isNotEmpty;
     final client = GraphQLProvider.of(context).value;
     final result = await client.query(QueryOptions(
-      document: gql(readWsCards),
+      document: gql(isSearching ? searchWsCards : readWsCards),
       variables: {
         'setCode': widget.setCode,
         'pageNum': pageKey,
         'pageSize': _pageSize,
         'baseOnly': _baseOnly,
+        if (isSearching) 'query': _searchQuery,
       },
       fetchPolicy: FetchPolicy.networkOnly,
     ));
@@ -54,7 +72,7 @@ class _WsCardListViewState extends State<WsCardListView> {
       return;
     }
 
-    final List? fetched = result.data?['cards'];
+    final List? fetched = result.data?[isSearching ? 'searchCards' : 'cards'];
     final items = (fetched ?? [])
         .whereType<Map<String, dynamic>>()
         .map(WsCard.fromMap)
@@ -108,18 +126,44 @@ class _WsCardListViewState extends State<WsCardListView> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Row(
+          child: Column(
             children: [
-              FilterChip(
-                label: const Text('Base'),
-                selected: _baseOnly,
-                onSelected: (_) => _toggleBaseOnly(),
+              TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'Search cards…',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearchChanged('');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  isDense: true,
+                ),
               ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(_readMode ? Icons.grid_on : Icons.view_agenda),
-                tooltip: _readMode ? 'Explore' : 'Read',
-                onPressed: () => setState(() => _readMode = !_readMode),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  FilterChip(
+                    label: const Text('Base'),
+                    selected: _baseOnly,
+                    onSelected: (_) => _toggleBaseOnly(),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(_readMode ? Icons.grid_on : Icons.view_agenda),
+                    tooltip: _readMode ? 'Explore' : 'Read',
+                    onPressed: () => setState(() => _readMode = !_readMode),
+                  ),
+                ],
               ),
             ],
           ),

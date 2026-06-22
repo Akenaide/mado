@@ -63,6 +63,17 @@ query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: 
 }
 """;
 
+const searchWsCards = """
+query SearchCards(\$setCode: String!, \$query: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean) {
+  searchCards(setCode: \$setCode, query: \$query, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly) {
+    idCard
+    setCode
+    imagePath
+    cardType
+  }
+}
+""";
+
 const getWsCard = """
 query GetCard(\$idCard: String!) {
   card(idCard: \$idCard) {
