@@ -51,6 +51,33 @@ def get_card(id_card: str) -> typing.Optional[Card]:
     return Card(**{k: v for k, v in hits[0].items() if k in fields})
 
 
+def search_cards(
+    set_code: str,
+    query: str = "",
+    page_size: int = settings.page_size,
+    page_num: int = 1,
+    base_only: bool = False,
+) -> typing.List[Card]:
+    client = get_meili_client()
+    filters = [f'set_code = "{set_code}"']
+    if base_only:
+        rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
+        filters.append(f"({rarity_filter})")
+
+    result = client.index("cards").search(
+        query,
+        {
+            "filter": " AND ".join(filters),
+            "sort": ["id_card:asc"],
+            **pagination(page_size=page_size, page_num=page_num),
+        },
+    )
+    fields = {f.name for f in dataclasses.fields(Card)}
+    return [
+        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+    ]
+
+
 def get_cards(
     set_code: str,
     page_size: int = settings.page_size,

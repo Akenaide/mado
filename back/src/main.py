@@ -36,6 +36,9 @@ class Query:
     cards: typing.List[object_card.Card] = strawberry.field(
         resolver=object_card.get_cards
     )
+    search_cards: typing.List[object_card.Card] = strawberry.field(
+        resolver=object_card.search_cards
+    )
     card: typing.Optional[object_card.Card] = strawberry.field(
         resolver=object_card.get_card
     )
