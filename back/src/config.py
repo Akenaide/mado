@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     meili_master_key: str
     page_size: int = 20
     allowed_origins: list[str] = ["http://localhost"]
+    allow_origin_regex: str | None = None
 
 
 @lru_cache
