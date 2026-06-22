@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     page_size: int = 20
     allowed_origins: list[str] = ["http://localhost"]
     allow_origin_regex: str | None = None
+    public_url: str = "http://localhost"
 
 
 @lru_cache

@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_list_view.dart';
 import 'package:mado_flutter/src/ws_set/ws_card_list_view.dart';
+import 'package:mado_flutter/src/ws_set/ws_card_detail_view.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
 import 'sample_feature/sample_item_list_view.dart';
@@ -81,7 +82,16 @@ class MyApp extends StatelessWidget {
                       return const SampleItemDetailsView();
                     }
                     if (name?.startsWith('/set/') ?? false) {
-                      final setCode = name!.substring('/set/'.length);
+                      final rest = name!.substring('/set/'.length);
+                      final cardMarker = rest.indexOf('/card/');
+                      if (cardMarker != -1) {
+                        final setCode = rest.substring(0, cardMarker);
+                        final idCard = Uri.decodeComponent(
+                            rest.substring(cardMarker + '/card/'.length));
+                        return WsCardDetailRoute(
+                            idCard: idCard, setCode: setCode);
+                      }
+                      final setCode = rest;
                       final args =
                           routeSettings.arguments as Map<String, String>?;
                       final title = args?['title'] ?? setCode;

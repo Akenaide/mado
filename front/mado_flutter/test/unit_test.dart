@@ -10,6 +10,47 @@ void main() {
   });
 
   group('WsCard', () {
+    test('fromMap parses full stat fields', () {
+      """
+      WsCard.fromMap populates all stat fields from a full getCard payload.
+
+      Given:
+      - A Map with name, level, cost, power, soul, color, triggers,
+        abilities, specialAttribute, flavourText
+
+      When:
+      - WsCard.fromMap is called
+
+      Then:
+      - All stat fields match the input values
+      """;
+      final card = WsCard.fromMap({
+        'idCard': 'X',
+        'setCode': 'Y',
+        'cardType': 'CH',
+        'name': 'Asuna',
+        'level': 2,
+        'cost': 1,
+        'power': 8500,
+        'soul': 1,
+        'color': 'Blue',
+        'triggers': ['Soul'],
+        'abilities': ['[A] When this card attacks, draw 1 card.'],
+        'specialAttribute': ['Sword', 'Net Game'],
+        'flavourText': 'I will protect you.',
+      });
+      expect(card.name, 'Asuna');
+      expect(card.level, 2);
+      expect(card.cost, 1);
+      expect(card.power, 8500);
+      expect(card.soul, 1);
+      expect(card.color, 'Blue');
+      expect(card.triggers, ['Soul']);
+      expect(card.abilities, ['[A] When this card attacks, draw 1 card.']);
+      expect(card.specialAttribute, ['Sword', 'Net Game']);
+      expect(card.flavourText, 'I will protect you.');
+    });
+
     test('fromMap parses all fields', () {
       /// Parsing a valid cards GraphQL payload produces correct WsCard.
       ///

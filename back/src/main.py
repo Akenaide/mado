@@ -7,6 +7,7 @@ import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import HTMLResponse
 from strawberry.fastapi import GraphQLRouter
 from fastapi.staticfiles import StaticFiles
 
@@ -35,6 +36,9 @@ class Query:
     cards: typing.List[object_card.Card] = strawberry.field(
         resolver=object_card.get_cards
     )
+    card: typing.Optional[object_card.Card] = strawberry.field(
+        resolver=object_card.get_card
+    )
 
 
 app = FastAPI(lifespan=lifespan)
@@ -53,6 +57,40 @@ schema = strawberry.Schema(Query)
 graphql_app = GraphQLRouter(schema)
 
 app.include_router(graphql_app, prefix="/graphql")
+
+
+@app.get("/og/set/{set_code}/card/{id_card}", response_class=HTMLResponse)
+def og_card(set_code: str, id_card: str):
+    card = object_card.get_card(id_card)
+    if card is None:
+        return HTMLResponse(status_code=404, content="Not found")
+    image_url = f"{settings.public_url}{card.image_path}"
+    description = " · ".join(
+        filter(
+            None,
+            [
+                card.name,
+                f"Lv.{card.level}" if card.level is not None else None,
+                f"Power {card.power}" if card.power else None,
+                card.color,
+            ],
+        )
+    )
+    html = f"""<!doctype html>
+<html>
+<head>
+  <meta property="og:title" content="{card.name}" />
+  <meta property="og:description" content="{description}" />
+  <meta property="og:image" content="{image_url}" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{card.name}" />
+  <meta name="twitter:description" content="{description}" />
+  <meta name="twitter:image" content="{image_url}" />
+</head>
+<body></body>
+</html>"""
+    return HTMLResponse(content=html)
 
 
 @app.get("/")
