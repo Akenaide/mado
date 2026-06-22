@@ -40,6 +40,7 @@ def main():
     )
     cards.update_filterable_attributes(
         [
+            "id_card",
             "set",
             "color",
             "level",

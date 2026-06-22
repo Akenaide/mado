@@ -147,8 +147,10 @@ class _WsCardListViewState extends State<WsCardListView> {
                 builderDelegate: PagedChildBuilderDelegate(
                   itemBuilder: (context, card, index) => RepaintBoundary(
                     child: GestureDetector(
-                      onTap:
-                          _readMode ? null : () => _showCardZoom(context, card),
+                      onTap: () => Navigator.of(context).pushNamed(
+                        '/set/${widget.setCode}/card/${Uri.encodeComponent(card.idCard)}',
+                      ),
+                      onLongPress: () => _showCardZoom(context, card),
                       child: _CardTile(card: card),
                     ),
                   ),

@@ -1,0 +1,33 @@
+# Drop into your server {} block.
+# Replace BACKEND_HOST with the host/port of the FastAPI backend.
+
+map $http_user_agent $is_crawler {
+    default         0;
+    "~*Slackbot"    1;
+    "~*Twitterbot"  1;
+    "~*facebookexternalhit" 1;
+    "~*LinkedInBot" 1;
+    "~*WhatsApp"    1;
+    "~*Discordbot"  1;
+    "~*TelegramBot" 1;
+}
+
+server {
+    listen 80;
+    root /var/www/mado;  # path to Flutter web build
+    index index.html;
+
+    # Crawler requests for card pages → FastAPI OG endpoint
+    location ~ ^/set/([^/]+)/card/(.+)$ {
+        if ($is_crawler) {
+            proxy_pass http://BACKEND_HOST/og/set/$1/card/$2;
+            break;
+        }
+        try_files $uri /index.html;
+    }
+
+    # All other routes → Flutter SPA
+    location / {
+        try_files $uri /index.html;
+    }
+}

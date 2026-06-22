@@ -4,6 +4,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:gql/ast.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_list_view.dart';
 import 'package:mado_flutter/src/ws_set/ws_set_models.dart';
+import 'package:mado_flutter/src/ws_set/ws_card_models.dart';
+import 'package:mado_flutter/src/ws_set/ws_card_detail_view.dart';
 
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -111,6 +113,54 @@ void main() {
       expect(find.textContaining('トライアルデッキ'), findsOneWidget);
       expect(find.textContaining('5'), findsWidgets);
       expect(find.textContaining('0'), findsOneWidget);
+    });
+  });
+
+  group('WsCardDetailView', () {
+    testWidgets('shows name and abilities as SelectableText',
+        (WidgetTester tester) async {
+      """
+      WsCardDetailView renders translatable text fields with SelectableText.
+
+      Given:
+      - A WsCard with name 'Asuna' and one ability
+
+      When:
+      - WsCardDetailView is pumped with that card
+
+      Then:
+      - SelectableText with 'Asuna' is present
+      - SelectableText containing '[A]' is present
+      """;
+      final card = WsCard.fromMap({
+        'idCard': 'X',
+        'setCode': 'Y',
+        'cardType': 'CH',
+        'name': 'Asuna',
+        'level': 2,
+        'cost': 1,
+        'power': 8500,
+        'soul': 1,
+        'color': 'Blue',
+        'triggers': ['Soul'],
+        'abilities': ['[A] When this card attacks, draw 1 card.'],
+        'specialAttribute': ['Sword'],
+        'flavourText': 'I will protect you.',
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: WsCardDetailView(card: card, setCode: 'Y'),
+      ));
+
+      expect(
+        find.byWidgetPredicate((w) => w is SelectableText && w.data == 'Asuna'),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+            (w) => w is SelectableText && (w.data ?? '').contains('[A]')),
+        findsOneWidget,
+      );
     });
   });
 

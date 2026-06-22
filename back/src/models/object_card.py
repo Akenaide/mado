@@ -39,6 +39,18 @@ class Card:
 BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 
 
+def get_card(id_card: str) -> typing.Optional[Card]:
+    client = get_meili_client()
+    result = client.index("cards").search(
+        "", {"filter": f'id_card = "{id_card}"', "limit": 1}
+    )
+    hits = result["hits"]
+    if not hits:
+        return None
+    fields = {f.name for f in dataclasses.fields(Card)}
+    return Card(**{k: v for k, v in hits[0].items() if k in fields})
+
+
 def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
