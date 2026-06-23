@@ -5,12 +5,16 @@ _GQL_CARDS_PAGINATED = (
 )
 
 _CARD_HIT = {
-    "set_code": "BCS/W52",
-    "name": "Test Card",
-    "image64": "",
-    "image_url": "",
     "id_card": "BCS/W52-001",
-    "ability": [],
+    "cardcode": "BCS/W52-001",
+    "set_code": "BCS/W52",
+    "set": "BCS",
+    "set_name": "Test Set",
+    "side": "W",
+    "release": "2020-01-01",
+    "name": "Test Card",
+    "image_url": "",
+    "image_path": "",
     "rarity": "C",
     "level": 0,
     "cost": 0,
@@ -19,6 +23,10 @@ _CARD_HIT = {
     "color": "Y",
     "card_type": "Character",
     "special_attribute": [],
+    "abilities": [],
+    "triggers": [],
+    "flavour_text": "",
+    "expansionId": 1,
     "language": "jp",
 }
 

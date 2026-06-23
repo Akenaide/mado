@@ -1,0 +1,3 @@
+## 2024-06-23 - Offload synchronous Meilisearch calls to threads in Strawberry GraphQL
+**Learning:** The backend `meilisearch` Python client is synchronous. In a FastAPI/uvicorn application using Strawberry GraphQL, making synchronous network calls directly inside resolver functions blocks the entire event loop, severely degrading concurrent request performance. Strawberry natively supports `async` resolvers and automatically awaits them.
+**Action:** Always define Strawberry resolvers doing network or blocking I/O as `async def` and wrap any synchronous client calls (like `meilisearch`) using `asyncio.to_thread()`. This allows other concurrent requests to be processed while waiting for the I/O operation to complete.
