@@ -30,7 +30,6 @@ _CARD_HIT = {
     "triggers": [],
     "flavour_text": "Flavor",
     "expansionId": 1,
-
 }
 
 
