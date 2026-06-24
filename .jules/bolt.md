@@ -1,0 +1,3 @@
+## 2024-06-24 - Async IO in Strawberry Resolvers
+**Learning:** By making resolvers `async def`, Strawberry automatically awaits them, allowing us to safely use `asyncio.to_thread()` to wrap synchronous IO (like Meilisearch HTTP calls) without blocking the FastAPI event loop. No modifications are needed at the `strawberry.field(resolver=...)` registration site.
+**Action:** When wrapping synchronous database clients or IO bound operations inside GraphQL resolvers in a FastAPI app, prefer wrapping them in `asyncio.to_thread` and defining the resolver as `async def`. This boosts performance by not blocking the main thread, and Strawberry handles the async execution transparently.
