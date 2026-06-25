@@ -1,3 +1,4 @@
+import asyncio
 import dataclasses
 import typing
 import strawberry
@@ -39,7 +40,7 @@ class Card:
 BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 
 
-def get_cards(
+async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
     page_num: int = 1,
@@ -50,14 +51,21 @@ def get_cards(
     if base_only:
         rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
         filters.append(f"({rarity_filter})")
-    result = client.index("cards").search(
-        "",
-        {
-            "filter": " AND ".join(filters),
-            "sort": ["id_card:asc"],
-            **pagination(page_size=page_size, page_num=page_num),
-        },
-    )
+
+    def _search():
+        # Optimization: use asyncio.to_thread to prevent the synchronous Meilisearch network
+        # call from blocking the FastAPI/uvicorn event loop. This improves concurrent throughput.
+        return client.index("cards").search(
+            "",
+            {
+                "filter": " AND ".join(filters),
+                "sort": ["id_card:asc"],
+                **pagination(page_size=page_size, page_num=page_num),
+            },
+        )
+
+    result = await asyncio.to_thread(_search)
+
     fields = {f.name for f in dataclasses.fields(Card)}
     return [
         Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]

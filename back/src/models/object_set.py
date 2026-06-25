@@ -40,6 +40,8 @@ async def get_sets(
     client = get_meili_client()
 
     def _search():
+        # Optimization: use asyncio.to_thread to prevent the synchronous Meilisearch network
+        # call from blocking the FastAPI/uvicorn event loop. This improves concurrent throughput.
         return client.index("sets").search(
             "", pagination(page_size=page_size, page_num=page_num)
         )
@@ -56,6 +58,8 @@ async def search_sets(
     client = get_meili_client()
 
     def _search():
+        # Optimization: use asyncio.to_thread to prevent the synchronous Meilisearch network
+        # call from blocking the FastAPI/uvicorn event loop. This improves concurrent throughput.
         return client.index("sets").search(
             query, pagination(page_size=page_size, page_num=page_num)
         )
@@ -64,11 +68,18 @@ async def search_sets(
     return [Set(**hit) for hit in result["hits"]]
 
 
-def get_set_stats(query: str = ""):
+async def get_set_stats(query: str = ""):
     client = get_meili_client()
-    result = client.index("sets").search(
-        query, {"limit": 0, "facets": ["product_type"]}
-    )
+
+    def _search():
+        # Optimization: use asyncio.to_thread to prevent the synchronous Meilisearch network
+        # call from blocking the FastAPI/uvicorn event loop. This improves concurrent throughput.
+        return client.index("sets").search(
+            query, {"limit": 0, "facets": ["product_type"]}
+        )
+
+    result = await asyncio.to_thread(_search)
+
     dist = result.get("facetDistribution", {}).get("product_type", {})
     # product_type is always set by the importer but may be "" for legacy docs — skip those
     categories = [CategoryStat(name=k, count=v) for k, v in dist.items() if k]
