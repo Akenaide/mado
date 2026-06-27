@@ -1,0 +1,3 @@
+## 2024-10-18 - Strawberry Resolvers and FastAPI Event Loop
+**Learning:** By default, Strawberry runs synchronous resolvers on the main thread. If a resolver calls blocking network I/O (like a synchronous Meilisearch client call), it will block FastAPI's entire asyncio event loop, causing severe latency under load. Additionally, calling `dataclasses.fields()` on every request is a hidden CPU bottleneck.
+**Action:** Always make Strawberry resolvers `async def` and wrap synchronous database/network clients using `asyncio.to_thread()`. Also, compute `dataclasses.fields()` once at module load time by saving it to a constant like `CARD_FIELDS`, rather than inside the request loop.
