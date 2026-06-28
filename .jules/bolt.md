@@ -1,0 +1,3 @@
+## 2026-06-28 - [Pre-computing dataclasses.fields() and Async Meilisearch calls]
+**Learning:** Computing `dataclasses.fields()` inside a GraphQL resolver creates a hidden CPU bottleneck as it gets evaluated on every request. Additionally, the Meilisearch python client is synchronous, which can block the FastAPI/uvicorn event loop when making network calls in resolvers.
+**Action:** Always pre-compute constant sets like `dataclasses.fields()` at module load time. Always wrap synchronous network calls inside Strawberry GraphQL resolvers in `asyncio.to_thread()` within an `async def` resolver to prevent event loop blocking.

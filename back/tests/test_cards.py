@@ -20,6 +20,16 @@ _CARD_HIT = {
     "card_type": "Character",
     "special_attribute": [],
     "language": "jp",
+    "cardcode": "",
+    "set": "",
+    "set_name": "",
+    "side": "",
+    "release": "",
+    "image_path": "",
+    "abilities": [],
+    "triggers": [],
+    "flavour_text": "",
+    "expansionId": 0,
 }
 
 
