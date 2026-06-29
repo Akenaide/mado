@@ -1,0 +1,3 @@
+## 2024-06-29 - [Strawberry/FastAPI Thread Blocking & Dataclass Iteration]
+**Learning:** The meilisearch Python client is synchronous, and when called in standard `def` strawberry resolvers within a FastAPI app, it blocks the main event loop, causing poor concurrent performance. Furthermore, repeatedly computing `dataclasses.fields()` inside a loop or on every request for mapping response fields to typed dataclasses adds a hidden overhead.
+**Action:** When using synchronous network clients in FastAPI/Strawberry, always make the resolver `async def` and wrap the IO call in `asyncio.to_thread`. Additionally, cache reflection-based operations like `dataclasses.fields()` at module load time rather than dynamically per request.
