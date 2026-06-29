@@ -41,6 +41,7 @@ BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 
 _CARD_FIELDS = {f.name for f in dataclasses.fields(Card)}
 
+
 async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
@@ -65,5 +66,6 @@ async def get_cards(
 
     result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
