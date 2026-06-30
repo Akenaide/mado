@@ -43,6 +43,7 @@ BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 # This provides a small CPU performance optimization in the request loop
 CARD_FIELDS = {f.name for f in dataclasses.fields(Card)}
 
+
 async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
@@ -68,5 +69,6 @@ async def get_cards(
     # Wrap Meilisearch network call in asyncio.to_thread to avoid blocking event loop
     result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in CARD_FIELDS}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in CARD_FIELDS})
+        for hit in result["hits"]
     ]
