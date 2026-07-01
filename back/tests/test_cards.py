@@ -20,6 +20,16 @@ _CARD_HIT = {
     "card_type": "Character",
     "special_attribute": [],
     "language": "jp",
+    "cardcode": "W52-001",
+    "set": "BCS",
+    "set_name": "Test Set",
+    "side": "W",
+    "release": "2020-01-01",
+    "image_path": "",
+    "abilities": [],
+    "triggers": [],
+    "flavour_text": "",
+    "expansionId": 1,
 }
 
 
