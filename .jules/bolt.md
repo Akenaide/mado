@@ -1,0 +1,3 @@
+## 2025-02-23 - Async resolvers and cached fields computation
+**Learning:** Hidden CPU bottlenecks can exist when strawberry resolvers execute synchronous blocking calls like the `meilisearch` query on the event loop, and when they repeat constant computations like `dataclasses.fields(Card)` for every hit or request. In Strawberry, synchronous execution inside a resolver blocks other asynchronous requests leading to degraded performance.
+**Action:** When a resolver calls a blocking sync API, use `asyncio.to_thread()` so the call runs in a thread pool and frees the main event loop. Compute invariant configuration, such as the fields of a dataclass, at the module level rather than on the hot path (inside a GraphQL resolver loops).
