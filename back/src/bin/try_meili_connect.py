@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import fixpath as _
+import fixpath as _  # noqa: F401
 from meili_client import get_meili_client
 
 

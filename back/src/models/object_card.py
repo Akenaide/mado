@@ -1,3 +1,4 @@
+import asyncio
 import dataclasses
 import typing
 import strawberry
@@ -39,7 +40,12 @@ class Card:
 BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 
 
-def get_cards(
+# Cache dataclass fields at module load time to avoid recomputing it inside the request loop,
+# which eliminates a hidden CPU bottleneck on every query
+_CARD_FIELDS = {f.name for f in dataclasses.fields(Card)}
+
+
+async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
     page_num: int = 1,
@@ -50,15 +56,21 @@ def get_cards(
     if base_only:
         rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
         filters.append(f"({rarity_filter})")
-    result = client.index("cards").search(
-        "",
-        {
-            "filter": " AND ".join(filters),
-            "sort": ["id_card:asc"],
-            **pagination(page_size=page_size, page_num=page_num),
-        },
-    )
-    fields = {f.name for f in dataclasses.fields(Card)}
+
+    # Run the synchronous Meilisearch call in a thread pool to avoid blocking the FastAPI event loop
+    def _search():
+        return client.index("cards").search(
+            "",
+            {
+                "filter": " AND ".join(filters),
+                "sort": ["id_card:asc"],
+                **pagination(page_size=page_size, page_num=page_num),
+            },
+        )
+
+    result = await asyncio.to_thread(_search)
+
     return [
-        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
