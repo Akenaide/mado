@@ -14,3 +14,11 @@ repos:
     -   id: black
         files: ^back/
         types: [python]
+-   repo: local
+    hooks:
+    -   id: dart-format
+        name: dart format
+        language: system
+        entry: dart format
+        types: [file]
+        files: \.dart$
