@@ -64,11 +64,17 @@ async def search_sets(
     return [Set(**hit) for hit in result["hits"]]
 
 
-def get_set_stats(query: str = ""):
+async def get_set_stats(query: str = ""):
     client = get_meili_client()
-    result = client.index("sets").search(
-        query, {"limit": 0, "facets": ["product_type"]}
-    )
+
+    def _search():
+        return client.index("sets").search(
+            query, {"limit": 0, "facets": ["product_type"]}
+        )
+
+    # meilisearch python client is sync, use to_thread to avoid blocking event loop
+    result = await asyncio.to_thread(_search)
+
     dist = result.get("facetDistribution", {}).get("product_type", {})
     # product_type is always set by the importer but may be "" for legacy docs — skip those
     categories = [CategoryStat(name=k, count=v) for k, v in dist.items() if k]

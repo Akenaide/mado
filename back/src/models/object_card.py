@@ -1,6 +1,7 @@
 import dataclasses
 import typing
 import strawberry
+import asyncio
 
 from meili_client import get_meili_client
 from models.utils import pagination
@@ -38,8 +39,11 @@ class Card:
 
 BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR"]
 
+# Cache fields at module level to avoid recomputing on every request
+_CARD_FIELDS = {f.name for f in dataclasses.fields(Card)}
 
-def get_cards(
+
+async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
     page_num: int = 1,
@@ -50,15 +54,20 @@ def get_cards(
     if base_only:
         rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
         filters.append(f"({rarity_filter})")
-    result = client.index("cards").search(
-        "",
-        {
-            "filter": " AND ".join(filters),
-            "sort": ["id_card:asc"],
-            **pagination(page_size=page_size, page_num=page_num),
-        },
-    )
-    fields = {f.name for f in dataclasses.fields(Card)}
+
+    def _search():
+        return client.index("cards").search(
+            "",
+            {
+                "filter": " AND ".join(filters),
+                "sort": ["id_card:asc"],
+                **pagination(page_size=page_size, page_num=page_num),
+            },
+        )
+
+    # meilisearch python client is sync, use to_thread to avoid blocking event loop
+    result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
