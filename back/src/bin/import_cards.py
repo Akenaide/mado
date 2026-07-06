@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-import fixpath as _
+import fixpath as _  # noqa: F401
 from config import get_settings
 from meili_client import get_meili_client
 from models.object_card import Card
