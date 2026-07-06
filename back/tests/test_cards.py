@@ -1,3 +1,4 @@
+_GQL_RELATED = '{ cards(setCode: "BCS/W52") { relatedCards } }'
 _GQL_CARDS = '{ cards(setCode: "BCS/W52") { idCard name setCode } }'
 _GQL_CARDS_SORT = '{ cards(setCode: "BCS/W52") { idCard } }'
 _GQL_CARDS_PAGINATED = (
@@ -5,12 +6,16 @@ _GQL_CARDS_PAGINATED = (
 )
 
 _CARD_HIT = {
-    "set_code": "BCS/W52",
-    "name": "Test Card",
-    "image64": "",
-    "image_url": "",
     "id_card": "BCS/W52-001",
-    "ability": [],
+    "cardcode": "BCS/W52-001",
+    "set_code": "BCS/W52",
+    "set": "BCS/W52",
+    "set_name": "Test Set",
+    "side": "W",
+    "release": "52",
+    "name": "Test Card",
+    "image_url": "",
+    "image_path": "",
     "rarity": "C",
     "level": 0,
     "cost": 0,
@@ -19,8 +24,36 @@ _CARD_HIT = {
     "color": "Y",
     "card_type": "Character",
     "special_attribute": [],
+    "abilities": [],
+    "triggers": [],
+    "flavour_text": "",
+    "expansionId": 1,
     "language": "jp",
 }
+
+
+def test_card_has_related_cards_field(client, mock_meili_cards):
+    """
+    GraphQL Card type exposes relatedCards as a list of strings.
+
+    Given:
+    - Meilisearch returns a card hit with related_cards=["SET-002"]
+
+    When:
+    - GraphQL `{ cards(setCode: "BCS/W52") { relatedCards } }` is sent
+
+    Then:
+    - Response contains relatedCards: ["SET-002"] for the first card
+    """
+    mock_meili_cards.index.return_value.search.return_value = {
+        "hits": [{**_CARD_HIT, "related_cards": ["SET-002"]}],
+    }
+
+    response = client.post("/graphql", json={"query": _GQL_RELATED})
+    assert response.status_code == 200
+    data = response.json()
+    assert "errors" not in data, data.get("errors")
+    assert data["data"]["cards"][0]["relatedCards"] == ["SET-002"]
 
 
 def test_cards_returns_cards_for_set_code(client, mock_meili_cards):

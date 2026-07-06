@@ -30,7 +30,8 @@ class Set:
     image_path: typing.Optional[str] = None
     image_url: typing.Optional[str] = None
     set_code: str
-    product_type: str
+    licence_code: typing.Optional[str] = None
+    product_type: str = ""
 
 
 async def get_sets(

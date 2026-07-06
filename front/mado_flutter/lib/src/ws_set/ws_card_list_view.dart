@@ -25,6 +25,10 @@ class _WsCardListViewState extends State<WsCardListView> {
   bool _readMode = false;
   String _searchQuery = '';
   Timer? _debounce;
+  final Set<int> _levels = {};
+  final Set<String> _cardTypes = {};
+  final Set<int> _costs = {};
+  final Set<String> _triggers = {};
 
   @override
   void initState() {
@@ -61,6 +65,10 @@ class _WsCardListViewState extends State<WsCardListView> {
         'pageSize': _pageSize,
         'baseOnly': _baseOnly,
         if (isSearching) 'query': _searchQuery,
+        if (_levels.isNotEmpty) 'levels': _levels.toList(),
+        if (_cardTypes.isNotEmpty) 'cardTypes': _cardTypes.toList(),
+        if (_costs.isNotEmpty) 'costs': _costs.toList(),
+        if (_triggers.isNotEmpty) 'triggers': _triggers.toList(),
       },
       fetchPolicy: FetchPolicy.networkOnly,
     ));
@@ -120,92 +128,149 @@ class _WsCardListViewState extends State<WsCardListView> {
     _pagingController.refresh();
   }
 
+  void _toggleFilter<T>(Set<T> set, T value) {
+    setState(() => set.contains(value) ? set.remove(value) : set.add(value));
+    _pagingController.refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                decoration: InputDecoration(
-                  hintText: 'Search cards…',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            _onSearchChanged('');
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+    final readColumns = MediaQuery.of(context).size.width < 600 ? 2 : 3;
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  decoration: InputDecoration(
+                    hintText: 'Search cards…',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _onSearchChanged('');
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    isDense: true,
                   ),
-                  isDense: true,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  FilterChip(
-                    label: const Text('Base'),
-                    selected: _baseOnly,
-                    onSelected: (_) => _toggleBaseOnly(),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(_readMode ? Icons.grid_on : Icons.view_agenda),
-                    tooltip: _readMode ? 'Explore' : 'Read',
-                    onPressed: () => setState(() => _readMode = !_readMode),
-                  ),
-                ],
-              ),
-            ],
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('Base'),
+                      selected: _baseOnly,
+                      onSelected: (_) => _toggleBaseOnly(),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(_readMode ? Icons.grid_on : Icons.view_agenda),
+                      tooltip: _readMode ? 'Explore' : 'Read',
+                      onPressed: () => setState(() => _readMode = !_readMode),
+                    ),
+                  ],
+                ),
+                _FilterRow(
+                  chips: [
+                    for (final lv in [0, 1, 2, 3])
+                      _QuickChip(
+                        label: 'Lv.$lv',
+                        selected: _levels.contains(lv),
+                        onTap: () => _toggleFilter(_levels, lv),
+                      ),
+                    const _Divider(),
+                    _QuickChip(
+                      label: 'Chara',
+                      selected: _cardTypes.contains('CH'),
+                      onTap: () => _toggleFilter(_cardTypes, 'CH'),
+                    ),
+                    _QuickChip(
+                      label: 'CX',
+                      selected: _cardTypes.contains('CX'),
+                      onTap: () => _toggleFilter(_cardTypes, 'CX'),
+                    ),
+                    _QuickChip(
+                      label: 'Event',
+                      selected: _cardTypes.contains('EV'),
+                      onTap: () => _toggleFilter(_cardTypes, 'EV'),
+                    ),
+                    const _Divider(),
+                    for (final c in [0, 1, 2])
+                      _QuickChip(
+                        label: '$c',
+                        selected: _costs.contains(c),
+                        onTap: () => _toggleFilter(_costs, c),
+                      ),
+                    _QuickChip(
+                      label: '3+',
+                      selected: _costs.contains(-1),
+                      onTap: () => _toggleFilter(_costs, -1),
+                    ),
+                  ],
+                ),
+                _FilterRow(
+                  chips: [
+                    for (final t in [
+                      'SOUL',
+                      'GATE',
+                      'TREASURE',
+                      'COMEBACK',
+                      'CHOICE'
+                    ])
+                      _QuickChip(
+                        label: t[0] + t.substring(1).toLowerCase(),
+                        selected: _triggers.contains(t),
+                        onTap: () => _toggleFilter(_triggers, t),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final readColumns = constraints.maxWidth < 600 ? 2 : 3;
-              return PagedGridView<int, WsCard>(
-                pagingController: _pagingController,
-                padding: const EdgeInsets.all(8),
-                gridDelegate: _readMode
-                    ? SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: readColumns,
-                        crossAxisSpacing: 6,
-                        mainAxisSpacing: 6,
-                        childAspectRatio: 0.7,
-                      )
-                    : const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 150,
-                        crossAxisSpacing: 6,
-                        mainAxisSpacing: 6,
-                        childAspectRatio: 0.7,
-                      ),
-                builderDelegate: PagedChildBuilderDelegate(
-                  itemBuilder: (context, card, index) => RepaintBoundary(
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pushNamed(
-                        '/set/${widget.setCode}/card/${Uri.encodeComponent(card.idCard)}',
-                      ),
-                      onLongPress: () => _showCardZoom(context, card),
-                      child: _CardTile(card: card),
-                    ),
+        SliverPadding(
+          padding: const EdgeInsets.all(8),
+          sliver: PagedSliverGrid<int, WsCard>(
+            pagingController: _pagingController,
+            gridDelegate: _readMode
+                ? SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: readColumns,
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                    childAspectRatio: 0.7,
+                  )
+                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 150,
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                    childAspectRatio: 0.7,
                   ),
-                  firstPageErrorIndicatorBuilder: (context) => Center(
-                    child: Text(_pagingController.error.toString()),
+            builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (context, card, index) => RepaintBoundary(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pushNamed(
+                    '/set/${widget.setCode}/card/${Uri.encodeComponent(card.idCard)}',
                   ),
-                  noItemsFoundIndicatorBuilder: (context) =>
-                      const Center(child: Text('No cards found')),
+                  onLongPress: () => _showCardZoom(context, card),
+                  child: _CardTile(card: card),
                 ),
-              );
-            },
+              ),
+              firstPageErrorIndicatorBuilder: (context) => Center(
+                child: Text(_pagingController.error.toString()),
+              ),
+              noItemsFoundIndicatorBuilder: (context) =>
+                  const Center(child: Text('No cards found')),
+            ),
           ),
         ),
       ],
@@ -251,5 +316,51 @@ class _FallbackImage extends StatelessWidget {
       color: Colors.grey.shade200,
       child: const Icon(Icons.broken_image, size: 32, color: Colors.grey),
     );
+  }
+}
+
+class _FilterRow extends StatelessWidget {
+  final List<Widget> chips;
+  const _FilterRow({required this.chips});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(spacing: 4, children: chips),
+    );
+  }
+}
+
+class _QuickChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _QuickChip(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: 1,
+        height: 20,
+        color: Colors.grey.shade300,
+        margin: const EdgeInsets.symmetric(horizontal: 4));
   }
 }

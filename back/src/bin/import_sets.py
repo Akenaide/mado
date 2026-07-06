@@ -39,6 +39,7 @@ class Document:
     title: str
     image_url: str
     set_code: str
+    licence_code: str
     product_type: str
 
 
@@ -61,6 +62,7 @@ def _transform_set_json(ws_set) -> Document:
         title=title,
         image_url=ws_set["Image"],
         set_code=set_code,
+        licence_code=ws_set.get("LicenceCode", ""),
         product_type=ws_set.get("ProductType", ""),
     )
 

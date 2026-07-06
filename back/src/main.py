@@ -42,6 +42,9 @@ class Query:
     card: typing.Optional[object_card.Card] = strawberry.field(
         resolver=object_card.get_card
     )
+    cards_by_ids: typing.List[object_card.Card] = strawberry.field(
+        resolver=object_card.get_cards_by_ids
+    )
 
 
 app = FastAPI(lifespan=lifespan)

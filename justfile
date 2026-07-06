@@ -49,6 +49,10 @@ import-sets:
 import-cards:
     cd back && uv run python src/bin/import_cards.py
 
+# Compute related cards (run after import-cards)
+related-cards:
+    cd back && uv run python src/bin/compute_related_cards.py
+
 # Run full data import (indexes → sets → cards)
 import: indexes import-sets import-cards
 

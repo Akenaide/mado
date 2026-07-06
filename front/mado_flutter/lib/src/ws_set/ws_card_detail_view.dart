@@ -16,8 +16,13 @@ class WsCardDetailView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
-          onPressed: () =>
-              Navigator.of(context).pushReplacementNamed('/set/$setCode'),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pushReplacementNamed('/set/$setCode');
+            }
+          },
         ),
         title: Text(card.name ?? card.idCard),
       ),
@@ -44,6 +49,12 @@ class WsCardDetailView extends StatelessWidget {
                 card.flavourText!,
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
+            ],
+            if (card.relatedCards.isNotEmpty) ...[
+              const Divider(height: 32),
+              Text('Related', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              _RelatedCardsSection(relatedIds: card.relatedCards),
             ],
           ],
         ),
@@ -131,6 +142,76 @@ class _FallbackImage extends StatelessWidget {
         color: Colors.grey.shade200,
         child: const Icon(Icons.broken_image, size: 32, color: Colors.grey),
       );
+}
+
+class _RelatedCardsSection extends StatefulWidget {
+  final List<String> relatedIds;
+  const _RelatedCardsSection({required this.relatedIds});
+
+  @override
+  State<_RelatedCardsSection> createState() => _RelatedCardsSectionState();
+}
+
+class _RelatedCardsSectionState extends State<_RelatedCardsSection> {
+  List<WsCard>? _cards;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_cards == null) _fetch();
+  }
+
+  Future<void> _fetch() async {
+    final client = GraphQLProvider.of(context).value;
+    final result = await client.query(QueryOptions(
+      document: gql(getRelatedWsCards),
+      variables: {'idCards': widget.relatedIds},
+      fetchPolicy: FetchPolicy.networkOnly,
+    ));
+    if (!mounted) return;
+    final hits = result.data?['cardsByIds'] as List?;
+    setState(() {
+      _cards = (hits ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(WsCard.fromMap)
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final backendUrl = const String.fromEnvironment('BACKEND_URL');
+    final cards = _cards;
+    if (cards == null)
+      return const SizedBox(
+          height: 80, child: Center(child: CircularProgressIndicator()));
+    return SizedBox(
+      height: 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: cards.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final c = cards[i];
+          final sc = c.idCard.split('-').first;
+          Widget img = c.imagePath != null
+              ? Image.network('$backendUrl${c.imagePath}',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const _FallbackImage())
+              : const _FallbackImage();
+          if (c.isCx) img = RotatedBox(quarterTurns: 1, child: img);
+          return GestureDetector(
+            onTap: () =>
+                Navigator.of(context).pushNamed('/set/$sc/card/${c.idCard}'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: img,
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 /// Route that fetches a single card then shows [WsCardDetailView].

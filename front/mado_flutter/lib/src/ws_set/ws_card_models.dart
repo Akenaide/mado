@@ -13,6 +13,7 @@ class WsCard {
   final List<String> abilities;
   final List<String> specialAttribute;
   final String? flavourText;
+  final List<String> relatedCards;
 
   const WsCard({
     required this.idCard,
@@ -29,6 +30,7 @@ class WsCard {
     this.abilities = const [],
     this.specialAttribute = const [],
     this.flavourText,
+    this.relatedCards = const [],
   });
 
   bool get isCx => cardType == 'CX';
@@ -49,12 +51,15 @@ class WsCard {
         specialAttribute:
             (m['specialAttribute'] as List?)?.cast<String>() ?? [],
         flavourText: m['flavourText'] as String?,
+        relatedCards: (m['relatedCards'] as List?)?.cast<String>() ?? [],
       );
 }
 
 const readWsCards = """
-query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean) {
-  cards(setCode: \$setCode, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly) {
+query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean,
+               \$levels: [Int!], \$cardTypes: [String!], \$costs: [Int!], \$triggers: [String!]) {
+  cards(setCode: \$setCode, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly,
+        levels: \$levels, cardTypes: \$cardTypes, costs: \$costs, triggers: \$triggers) {
     idCard
     setCode
     imagePath
@@ -64,12 +69,26 @@ query GetCards(\$setCode: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: 
 """;
 
 const searchWsCards = """
-query SearchCards(\$setCode: String!, \$query: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean) {
-  searchCards(setCode: \$setCode, query: \$query, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly) {
+query SearchCards(\$setCode: String!, \$query: String!, \$pageNum: Int, \$pageSize: Int, \$baseOnly: Boolean,
+                  \$levels: [Int!], \$cardTypes: [String!], \$costs: [Int!], \$triggers: [String!]) {
+  searchCards(setCode: \$setCode, query: \$query, pageNum: \$pageNum, pageSize: \$pageSize, baseOnly: \$baseOnly,
+              levels: \$levels, cardTypes: \$cardTypes, costs: \$costs, triggers: \$triggers) {
     idCard
     setCode
     imagePath
     cardType
+  }
+}
+""";
+
+const getRelatedWsCards = """
+query GetCardsByIds(\$idCards: [String!]!) {
+  cardsByIds(idCards: \$idCards) {
+    idCard
+    setCode
+    imagePath
+    cardType
+    name
   }
 }
 """;
@@ -91,6 +110,7 @@ query GetCard(\$idCard: String!) {
     abilities
     specialAttribute
     flavourText
+    relatedCards
   }
 }
 """;
