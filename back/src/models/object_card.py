@@ -49,22 +49,27 @@ async def get_cards_by_ids(id_cards: typing.List[str]) -> typing.List[Card]:
         return []
     client = get_meili_client()
     filter_val = " OR ".join(f'id_card = "{i}"' for i in id_cards)
+
     def _search():
         return client.index("cards").search(
             "", {"filter": filter_val, "limit": len(id_cards), "sort": ["id_card:asc"]}
         )
+
     result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
 
 
 async def get_card(id_card: str) -> typing.Optional[Card]:
     client = get_meili_client()
+
     def _search():
         return client.index("cards").search(
             "", {"filter": f'id_card = "{id_card}"', "limit": 1}
         )
+
     result = await asyncio.to_thread(_search)
     hits = result["hits"]
     if not hits:
@@ -120,9 +125,11 @@ async def search_cards(
                 **pagination(page_size=page_size, page_num=page_num),
             },
         )
+
     result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
 
 
@@ -142,6 +149,7 @@ async def get_cards(
         rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
         filters.append(f"({rarity_filter})")
     filters.extend(_quick_filters(levels, card_types, costs, triggers))
+
     def _search():
         return client.index("cards").search(
             "",
@@ -151,7 +159,9 @@ async def get_cards(
                 **pagination(page_size=page_size, page_num=page_num),
             },
         )
+
     result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS})
+        for hit in result["hits"]
     ]
