@@ -1,0 +1,3 @@
+## 2024-07-07 - [Optimize dataclass fields and synchronous IO]
+**Learning:** Computing `dataclasses.fields()` on every GraphQL resolver request is a hidden CPU bottleneck since it performs introspection on a large class repeatedly. Also, the meilisearch python client is synchronous, so running it directly inside a FastAPI/Strawberry resolver blocks the async event loop.
+**Action:** Compute constant attributes like `dataclasses.fields()` once at the module level. Always wrap synchronous network I/O with `asyncio.to_thread()` inside `async def` resolvers in FastAPI to prevent event loop blocking.

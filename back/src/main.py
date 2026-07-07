@@ -66,8 +66,8 @@ app.include_router(graphql_app, prefix="/graphql")
 
 
 @app.get("/og/set/{set_code}/card/{id_card}", response_class=HTMLResponse)
-def og_card(set_code: str, id_card: str):
-    card = object_card.get_card(id_card)
+async def og_card(set_code: str, id_card: str):
+    card = await object_card.get_card(id_card)
     if card is None:
         return HTMLResponse(status_code=404, content="Not found")
     image_url = f"{settings.public_url}{card.image_path}"

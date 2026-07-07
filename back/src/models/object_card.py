@@ -1,3 +1,4 @@
+import asyncio
 import dataclasses
 import typing
 import strawberry
@@ -39,31 +40,36 @@ class Card:
 
 BASE_RARITIES = ["RR", "R", "U", "C", "CC", "CR", "TD"]
 
+# Cache dataclasses.fields to avoid computing it on every request
+_CARD_FIELDS = {f.name for f in dataclasses.fields(Card)}
 
-def get_cards_by_ids(id_cards: typing.List[str]) -> typing.List[Card]:
+
+async def get_cards_by_ids(id_cards: typing.List[str]) -> typing.List[Card]:
     if not id_cards:
         return []
     client = get_meili_client()
     filter_val = " OR ".join(f'id_card = "{i}"' for i in id_cards)
-    result = client.index("cards").search(
-        "", {"filter": filter_val, "limit": len(id_cards), "sort": ["id_card:asc"]}
-    )
-    fields = {f.name for f in dataclasses.fields(Card)}
+    def _search():
+        return client.index("cards").search(
+            "", {"filter": filter_val, "limit": len(id_cards), "sort": ["id_card:asc"]}
+        )
+    result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
     ]
 
 
-def get_card(id_card: str) -> typing.Optional[Card]:
+async def get_card(id_card: str) -> typing.Optional[Card]:
     client = get_meili_client()
-    result = client.index("cards").search(
-        "", {"filter": f'id_card = "{id_card}"', "limit": 1}
-    )
+    def _search():
+        return client.index("cards").search(
+            "", {"filter": f'id_card = "{id_card}"', "limit": 1}
+        )
+    result = await asyncio.to_thread(_search)
     hits = result["hits"]
     if not hits:
         return None
-    fields = {f.name for f in dataclasses.fields(Card)}
-    return Card(**{k: v for k, v in hits[0].items() if k in fields})
+    return Card(**{k: v for k, v in hits[0].items() if k in _CARD_FIELDS})
 
 
 def _quick_filters(
@@ -74,7 +80,7 @@ def _quick_filters(
 ) -> typing.List[str]:
     extra = []
     if levels:
-        extra.append("(" + " OR ".join(f"level = {l}" for l in levels) + ")")
+        extra.append("(" + " OR ".join(f"level = {lvl}" for lvl in levels) + ")")
     if card_types:
         extra.append(
             "(" + " OR ".join(f'card_type = "{ct}"' for ct in card_types) + ")"
@@ -87,7 +93,7 @@ def _quick_filters(
     return extra
 
 
-def search_cards(
+async def search_cards(
     set_code: str,
     query: str = "",
     page_size: int = settings.page_size,
@@ -105,21 +111,22 @@ def search_cards(
         filters.append(f"({rarity_filter})")
     filters.extend(_quick_filters(levels, card_types, costs, triggers))
 
-    result = client.index("cards").search(
-        query,
-        {
-            "filter": " AND ".join(filters),
-            "sort": ["id_card:asc"],
-            **pagination(page_size=page_size, page_num=page_num),
-        },
-    )
-    fields = {f.name for f in dataclasses.fields(Card)}
+    def _search():
+        return client.index("cards").search(
+            query,
+            {
+                "filter": " AND ".join(filters),
+                "sort": ["id_card:asc"],
+                **pagination(page_size=page_size, page_num=page_num),
+            },
+        )
+    result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
     ]
 
 
-def get_cards(
+async def get_cards(
     set_code: str,
     page_size: int = settings.page_size,
     page_num: int = 1,
@@ -135,15 +142,16 @@ def get_cards(
         rarity_filter = " OR ".join(f'rarity = "{r}"' for r in BASE_RARITIES)
         filters.append(f"({rarity_filter})")
     filters.extend(_quick_filters(levels, card_types, costs, triggers))
-    result = client.index("cards").search(
-        "",
-        {
-            "filter": " AND ".join(filters),
-            "sort": ["id_card:asc"],
-            **pagination(page_size=page_size, page_num=page_num),
-        },
-    )
-    fields = {f.name for f in dataclasses.fields(Card)}
+    def _search():
+        return client.index("cards").search(
+            "",
+            {
+                "filter": " AND ".join(filters),
+                "sort": ["id_card:asc"],
+                **pagination(page_size=page_size, page_num=page_num),
+            },
+        )
+    result = await asyncio.to_thread(_search)
     return [
-        Card(**{k: v for k, v in hit.items() if k in fields}) for hit in result["hits"]
+        Card(**{k: v for k, v in hit.items() if k in _CARD_FIELDS}) for hit in result["hits"]
     ]
