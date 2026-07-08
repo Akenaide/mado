@@ -5,14 +5,14 @@ import datetime
 import hashlib
 import json
 import logging
-import os
+import os  # noqa: F401
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
 
-import fixpath as _
+import fixpath as _  # noqa: F401
 from config import get_settings
 from meili_client import get_meili_client
 
