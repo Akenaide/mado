@@ -27,6 +27,7 @@ class Set:
     release_date: str
     release_year: int
     title: str
+    title_codes: typing.List[str]
     image_path: typing.Optional[str] = None
     image_url: typing.Optional[str] = None
     set_code: str

@@ -12,7 +12,7 @@ def main():
     client = get_meili_client()
 
     sets = client.index("sets")
-    sets.update_searchable_attributes(["title", "release_date"])
+    sets.update_searchable_attributes(["title_codes", "title", "release_date"])
     sets.update_filterable_attributes(
         ["set_code", "licence_code", "release_date", "release_year", "product_type"]
     )

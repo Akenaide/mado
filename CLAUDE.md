@@ -11,34 +11,35 @@ Mado is a card list application for the Weiss Schwarz trading card game. It is a
 
 ## Backend Commands
 
-All backend commands run from `back/`.
+A `justfile` at the repo root wraps common commands. All backend commands run from `back/`.
 
 ```bash
 # Start dev server with hot-reload (preferred)
-docker compose watch
-
-# Run a specific script
-cd back && uv run python src/bin/import_sets.py
+just dev          # → cd back && podman compose watch
 
 # Lint / format
-black back/
+just fmt          # → black src/
 
-# Import data into Meilisearch
-uv run python src/bin/import_sets.py
-uv run python src/bin/import_cards.py
+# Import data into Meilisearch (order matters)
+just import       # indexes → sets → cards
+
+# Or step by step:
+just indexes      # create_indexes.py
+just import-sets
+just import-cards
 ```
 
-The backend runs behind Caddy on `http://localhost`. GraphQL playground: `http://localhost/graphql`.
+The backend runs behind Caddy on `http://localhost` in dev. GraphQL playground: `http://localhost/graphql`.
 
 ## Frontend Commands
 
 All frontend commands run from `front/mado_flutter/`.
 
 ```bash
-flutter run          # Run on connected device/emulator
-flutter test         # Run tests
-flutter analyze      # Lint / static analysis
-flutter build <platform>  # ios | android | web | macos | linux | windows
+just flutter-run     # flutter run -d chrome --dart-define-from-file=.env.json
+just flutter-test    # flutter test
+just flutter-analyze # flutter analyze
+just deploy-front    # build web + rsync to $DEPLOY_HOST
 ```
 
 ## Architecture
@@ -54,7 +55,7 @@ flutter build <platform>  # ios | android | web | macos | linux | windows
 
 - **Entry point:** `front/mado_flutter/lib/main.dart` — creates a `GraphQLClient` pointing to `$BACKEND_URL/graphql`, wraps the app in `GraphQLProvider`.
 - **App routing:** `front/mado_flutter/lib/src/app.dart` — `onGenerateRoute` dispatches to feature views.
-- **WsSet feature:** `front/mado_flutter/lib/src/ws_set/` — main feature; `WsSetListView` fetches/searches sets via GraphQL, `ws_set_models.dart` holds the queries and Dart models.
+- **WsSet feature:** `front/mado_flutter/lib/src/ws_set/` — main feature; `WsSetListView` fetches/searches sets, `WsCardListView` lists cards for a set, `WsCardDetailView` shows a single card. Models/queries in `ws_set_models.dart` and `ws_card_models.dart`.
 
 ### Data flow
 
