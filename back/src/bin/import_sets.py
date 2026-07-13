@@ -6,6 +6,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
@@ -41,6 +42,12 @@ class Document:
     set_code: str
     licence_code: str
     product_type: str
+    title_codes: list[str]
+
+
+def _parse_title_codes(raw: str) -> list[str]:
+    codes = [c for c in re.split(r"[#,]+", raw) if c]
+    return list(dict.fromkeys(codes))
 
 
 def _transform_set_json(ws_set) -> Document:
@@ -64,6 +71,7 @@ def _transform_set_json(ws_set) -> Document:
         set_code=set_code,
         licence_code=ws_set.get("LicenceCode", ""),
         product_type=ws_set.get("ProductType", ""),
+        title_codes=_parse_title_codes(ws_set.get("TitleName", "")),
     )
 
 
